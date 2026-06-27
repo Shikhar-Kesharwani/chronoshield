@@ -45,14 +45,16 @@ class ZScoreDetector:
 
     def _mean(self) -> float:
         n = len(self._buf)
-        return self._sum / n if n else 0.0
+        return math.fsum(self._buf) / n if n else 0.0
 
     def _std(self) -> float:
         n = len(self._buf)
         if n < 2:
             return 0.0
-        variance = (self._sum2 - (self._sum**2) / n) / (n - 1)
-        return math.sqrt(max(variance, 0.0))
+        m = self._mean()
+        # math.fsum avoids catastrophic cancellation (floating point drift)
+        variance = math.fsum((x - m) ** 2 for x in self._buf) / (n - 1)
+        return math.sqrt(variance)
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -66,16 +68,8 @@ class ZScoreDetector:
             - severity   : float in [0, 1]; 0 if not enough data yet
             - z_score    : the computed Z-score (None if window not full)
         """
-        # Evict oldest point if buffer is full
-        if len(self._buf) == self.window:
-            old = self._buf[0]
-            self._sum -= old
-            self._sum2 -= old * old
-
-        # Insert new point
+        # Insert new point (deque automatically evicts oldest if full)
         self._buf.append(value)
-        self._sum += value
-        self._sum2 += value * value
 
         # Need at least 2 points to have a meaningful std
         if len(self._buf) < max(2, self.window // 4):
@@ -117,5 +111,3 @@ class ZScoreDetector:
 
     def reset(self):
         self._buf.clear()
-        self._sum = 0.0
-        self._sum2 = 0.0

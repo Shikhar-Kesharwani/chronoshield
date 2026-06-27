@@ -23,6 +23,8 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
+import threading
+
 from config import IFOREST_CONTAMINATION, IFOREST_WINDOW
 
 log = logging.getLogger(__name__)
@@ -63,6 +65,10 @@ class IsolationForestDetector:
         self._points_since_retrain: int = 0
         self._score_min: float = -0.5
         self._score_max: float = 0.5
+        
+        # Threading state for background retraining
+        self._train_lock = threading.Lock()
+        self._is_training = False
 
     def _build_features(self, value: float) -> List[float]:
         delta = (
@@ -73,35 +79,59 @@ class IsolationForestDetector:
     def _train(self):
         if not _SKLEARN_AVAILABLE:
             return
-        X = list(self._buf)
+            
+        # Exclude the very last point to prevent data leakage (the point we are about to predict on)
+        X = list(self._buf)[:-1]
+        
         if len(X) < max(10, self.window // 4):
             return
-        arr = np.array(X)
-        self._model = _IF(
-            n_estimators=100,
-            contamination=self.contamination,
-            random_state=42,
-            n_jobs=-1,
-        )
-        self._model.fit(arr)
-        scores = self._model.decision_function(arr)
-        self._score_min = float(scores.min())
-        self._score_max = float(scores.max())
-        self._trained = True
-        log.debug(
-            f"IForest retrained on {len(X)} pts — score range [{self._score_min:.3f}, {self._score_max:.3f}]"
-        )
+            
+        def _do_train():
+            try:
+                arr = np.array(X)
+                model = _IF(
+                    n_estimators=100,
+                    contamination=self.contamination,
+                    random_state=42,
+                    n_jobs=-1,
+                )
+                model.fit(arr)
+                scores = model.decision_function(arr)
+                score_min = float(scores.min())
+                score_max = float(scores.max())
+                
+                # Atomically swap the model and normalization bounds
+                with self._train_lock:
+                    self._model = model
+                    self._score_min = score_min
+                    self._score_max = score_max
+                    self._trained = True
+                
+                log.debug(
+                    f"IForest retrained in background on {len(X)} pts — score range [{score_min:.3f}, {score_max:.3f}]"
+                )
+            except Exception as e:
+                log.error(f"IForest background training failed: {e}")
+            finally:
+                self._is_training = False
+
+        if not self._is_training:
+            self._is_training = True
+            threading.Thread(target=_do_train, daemon=True).start()
 
     def _normalise_score(self, raw_score: float) -> float:
         """
         Map decision_function score to [0, 1] anomaly severity.
         Lower raw scores = more anomalous → severity closer to 1.
         """
-        r = self._score_max - self._score_min
+        with self._train_lock:
+            s_min, s_max = self._score_min, self._score_max
+            
+        r = s_max - s_min
         if r < 1e-10:
             return 0.0
         # Invert: low score → high severity
-        severity = 1.0 - (raw_score - self._score_min) / r
+        severity = 1.0 - (raw_score - s_min) / r
         return float(np.clip(severity, 0.0, 1.0))
 
     def update(self, value: float) -> Tuple[bool, float, Optional[float]]:
@@ -120,20 +150,28 @@ class IsolationForestDetector:
         self._points_since_retrain += 1
 
         # Trigger (re)training
+        # Since _train runs in background, we just dispatch it and continue
+        with self._train_lock:
+            trained = self._trained
+            
         if (
-            not self._trained and len(self._buf) >= max(10, self.window // 4)
+            not trained and len(self._buf) >= max(10, self.window // 4)
         ) or (
-            self._trained and self._points_since_retrain >= self.retrain_every
+            trained and self._points_since_retrain >= self.retrain_every
         ):
             self._train()
             self._points_since_retrain = 0
 
-        if not self._trained or self._model is None:
+        with self._train_lock:
+            model = self._model
+            is_ready = self._trained and model is not None
+
+        if not is_ready:
             return False, 0.0, None
 
         arr = np.array([features])
-        raw_score = float(self._model.decision_function(arr)[0])
-        label = self._model.predict(arr)[0]  # -1 = anomaly, 1 = normal
+        raw_score = float(model.decision_function(arr)[0])
+        label = model.predict(arr)[0]  # -1 = anomaly, 1 = normal
 
         is_anomaly = bool(label == -1)
         severity = self._normalise_score(raw_score) if is_anomaly else 0.0
@@ -142,7 +180,9 @@ class IsolationForestDetector:
 
     def reset(self):
         self._buf.clear()
-        self._model = None
-        self._trained = False
+        with self._train_lock:
+            self._model = None
+            self._trained = False
         self._last_value = None
         self._points_since_retrain = 0
+        self._is_training = False
