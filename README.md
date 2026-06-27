@@ -1,267 +1,332 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:00E5FF,100:9D4EDD&height=200&section=header&text=ChronoShield&fontSize=70&fontAlignY=35&animation=fadeIn&fontColor=ffffff" width="100%" />
 
-  <h3><a href="https://github.com/AyushGU12/chronoshield">Real-Time Time-Series Anomaly Detection with Dual Machine Learning Pipelines</a></h3>
+<!-- Waving animated gradient banner -->
+![Banner](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=220&section=header&text=ChronoShield&fontSize=60&fontColor=fff&animation=twinkling&fontAlignY=38&desc=Enterprise-Grade%20Time-Series%20Anomaly%20Detection&descAlignY=58&descSize=20)
 
-  <p>
-    <a href="https://github.com/AyushGU12/chronoshield/stargazers"><img src="https://img.shields.io/github/stars/AyushGU12/chronoshield?style=for-the-badge&color=00E5FF&logo=github" alt="Stars" /></a>
-    <a href="https://github.com/AyushGU12/chronoshield/network/members"><img src="https://img.shields.io/github/forks/AyushGU12/chronoshield?style=for-the-badge&color=9D4EDD&logo=github" alt="Forks" /></a>
-    <a href="https://github.com/AyushGU12/chronoshield/issues"><img src="https://img.shields.io/github/issues/AyushGU12/chronoshield?style=for-the-badge&color=FF0055&logo=github" alt="Issues" /></a>
-    <a href="https://github.com/AyushGU12/chronoshield/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AyushGU12/chronoshield?style=for-the-badge&color=00E5FF" alt="License" /></a>
-  </p>
+<!-- Typing SVG -->
+![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=800&size=28&duration=2500&pause=800&color=00E5FF&background=00000000&center=true&vCenter=true&multiline=true&repeat=true&width=800&height=120&lines=Dual-Model+Anomaly+Detection;Real-Time+Metric+Streaming;Dynamic+Threshold+Tuning;Automated+Slack+Alerts)
 
-  <a href="https://readme-typing-svg.herokuapp.com"><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=20&pause=1000&color=00E5FF&center=true&vCenter=true&width=600&lines=Streaming+Data+Ingestion;O(1)+Rolling+Z-Score+Detection;Unsupervised+Isolation+Forests;Real-Time+SSE+Dashboard" alt="Typing SVG" /></a>
+<div align="center">
+
+![Stars](https://img.shields.io/github/stars/AyushGU12/chronoshield?style=for-the-badge&logo=github&color=6366f1)
+![Forks](https://img.shields.io/github/forks/AyushGU12/chronoshield?style=for-the-badge&logo=github&color=8b5cf6)
+![Issues](https://img.shields.io/github/issues/AyushGU12/chronoshield?style=for-the-badge&logo=github&color=ec4899)
+![License](https://img.shields.io/github/license/AyushGU12/chronoshield?style=for-the-badge&color=f97316)
+![Last Commit](https://img.shields.io/github/last-commit/AyushGU12/chronoshield?style=for-the-badge&color=14b8a6)
+
+</div>
+
+<br />
+
+[🌐 Live Demo](#) &nbsp;&nbsp; [📖 Documentation](#) &nbsp;&nbsp; [🐛 Report Bug](https://github.com/AyushGU12/chronoshield/issues) &nbsp;&nbsp; [✨ Request Feature](https://github.com/AyushGU12/chronoshield/issues) &nbsp;&nbsp; [💬 Discussions](https://github.com/AyushGU12/chronoshield/discussions)
+
+<svg width="700" height="120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="neon-glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="neon-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00E5FF">
+        <animate attributeName="stop-color"
+                 values="#00E5FF;#ec4899;#f97316;#14b8a6;#00E5FF"
+                 dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#ec4899">
+        <animate attributeName="stop-color"
+                 values="#ec4899;#f97316;#14b8a6;#00E5FF;#ec4899"
+                 dur="4s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+  </defs>
+  <rect width="700" height="120" rx="15" fill="#0d1117"/>
+  <text x="350" y="75" text-anchor="middle" font-size="48"
+        font-family="'Segoe UI', Arial Black" font-weight="900"
+        fill="url(#neon-grad)" filter="url(#neon-glow)">
+    ⚡ ChronoShield ⚡
+  </text>
+</svg>
+
 </div>
 
 ---
 
-## 📖 Executive Overview
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 120">
+  <defs>
+    <pattern id="hexbg" width="30" height="34.6" patternUnits="userSpaceOnUse">
+      <polygon points="15,0 30,8.66 30,25.98 15,34.64 0,25.98 0,8.66"
+               fill="none" stroke="#6366f1" stroke-width="0.4" opacity="0.25"/>
+    </pattern>
+    <linearGradient id="hgrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#00E5FF"/>
+      <stop offset="50%"  stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="120" fill="#0d1117"/>
+  <rect width="900" height="120" fill="url(#hexbg)"/>
+  <text x="450" y="68" text-anchor="middle"
+        font-size="36" fill="url(#hgrad)"
+        font-family="'Segoe UI', Arial Black" font-weight="900">
+    ✨ OVERVIEW ✨
+  </text>
+</svg>
 
-**ChronoShield** is a high-performance, event-driven anomaly detection pipeline designed to ingest live time-series data and surface statistical aberrations in real-time. Built for Data Engineers, MLOps, and SREs, it balances immediate detection with machine learning accuracy by utilizing a dual-path architecture:
+**ChronoShield** is a real-time, high-performance time-series anomaly detection engine designed for observability and infrastructure monitoring. 
 
-1. **Rolling Z-Score (Fast Path):** O(1) mathematical bounds checking for instantaneous spike detection.
-2. **Isolation Forest (Smart Path):** Scikit-Learn based unsupervised machine learning that adapts to underlying data drift.
+It ingests streaming telemetry data (CPU, memory, latency) and utilizes a dual-model machine learning architecture—combining the statistical rigor of **Adaptive Z-Scores** with the multidimensional robustness of **Isolation Forests**. When a metric deviates from baseline behavior, ChronoShield instantly flags the anomaly on a beautifully animated React dashboard and dispatches alerts via webhooks.
 
-**Problem Solved:** Prevents silent failures in production by providing immediate, visually stunning visibility into metric spikes, data corruption, and system latency without the heavy overhead of traditional batch processing.
+### 🎯 Problem It Solves
+Traditional static threshold alerts cause alert fatigue. Server loads fluctuate dynamically based on time of day, making hard-coded thresholds useless. ChronoShield applies unsupervised machine learning to understand the "normal" sinusoidal heartbeat of your infrastructure, dynamically adapting its thresholds and catching true anomalies instantly without spamming your engineers.
+
+### 👤 Target Users
+SREs, DevOps Engineers, and System Administrators who need intelligent, zero-configuration anomaly detection for their cloud infrastructure.
 
 ---
 
-## 🏗 System Architecture
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 120">
+  <defs>
+    <pattern id="hexbg2" width="30" height="34.6" patternUnits="userSpaceOnUse">
+      <polygon points="15,0 30,8.66 30,25.98 15,34.64 0,25.98 0,8.66"
+               fill="none" stroke="#6366f1" stroke-width="0.4" opacity="0.25"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="120" fill="#0d1117"/>
+  <rect width="900" height="120" fill="url(#hexbg2)"/>
+  <text x="450" y="68" text-anchor="middle"
+        font-size="36" fill="url(#hgrad)"
+        font-family="'Segoe UI', Arial Black" font-weight="900">
+    ✨ SYSTEM ARCHITECTURE ✨
+  </text>
+</svg>
 
-### 📊 High-Level Data Flow
+### 1. Full System Architecture
 
 ```mermaid
-graph LR
-    A[Data Generator] -->|Redis Streams| B(FastAPI Worker)
-    B -->|Z-Score Model| C{Detection Engine}
-    B -->|IForest Model| C
-    C -->|Anomaly Events| D[(TimescaleDB)]
-    C -->|Server-Sent Events| E[React UI]
-    E -->|Real-Time Chart| F[End User]
-    
-    style A fill:#06080F,stroke:#00E5FF
-    style B fill:#06080F,stroke:#9D4EDD
-    style C fill:#06080F,stroke:#FF0055
-    style D fill:#06080F,stroke:#00E5FF
-    style E fill:#06080F,stroke:#9D4EDD
+graph TB
+    subgraph Client["🖥️ Client Layer"]
+        WEB[🌐 React Dashboard]
+    end
+
+    subgraph API["🚪 API Layer"]
+        FAST[⚡ FastAPI Server]
+        SSE[📡 Server-Sent Events]
+    end
+
+    subgraph Processing["⚙️ Core Engine"]
+        WORK[🔄 Worker Thread]
+        GEN[📈 Data Generator]
+    end
+
+    subgraph Intelligence["🧠 AI/ML Layer"]
+        ZSC[📊 Z-Score Detector]
+        IFOR[🌲 Isolation Forest]
+    end
+
+    subgraph Data["🗄️ Data Layer"]
+        DB[(🐘 SQLite / TimescaleDB)]
+    end
+
+    subgraph Observability["👁️ Observability"]
+        SLACK[🚨 Slack Webhooks]
+    end
+
+    Client <-->|HTTP / SSE| API
+    API <--> Processing
+    Processing --> Intelligence
+    Processing <--> Data
+    Processing --> Observability
+
+    style Client fill:#1e1b4b,color:#fff,stroke:#6366f1,stroke-width:2px
+    style API fill:#1a1a2e,color:#fff,stroke:#ec4899,stroke-width:2px
+    style Processing fill:#0f3460,color:#fff,stroke:#0ea5e9,stroke-width:2px
+    style Intelligence fill:#2d1b4e,color:#fff,stroke:#a855f7,stroke-width:2px
+    style Data fill:#16213e,color:#fff,stroke:#84cc16,stroke-width:2px
+    style Observability fill:#1a0a00,color:#fff,stroke:#f97316,stroke-width:2px
 ```
 
-### 🧬 Request & Detection Lifecycle
+### 2. Request Lifecycle & Inference Pipeline
 
 ```mermaid
 sequenceDiagram
-    participant Generator
-    participant Redis
-    participant Worker
-    participant DB
-    participant Frontend
+    autonumber
+    actor U as 👤 Generator
+    participant Q as 📨 Queue
+    participant W as ⚙️ Worker
+    participant DB as 🗄️ Database
+    participant ML as 🤖 Models
+    participant A as 🚨 AlertManager
+    participant F as 🌐 Frontend
+
+    U->>Q: Push metric (cpu/mem/latency)
+    Q->>W: Pop metric
+    W->>ML: Evaluate Z-Score & iForest
+    ML-->>W: Anomaly Scores
+    W->>DB: Store Data + ML Result
     
-    Generator->>Redis: Push Metric (CPU)
-    Redis->>Worker: Consume Stream
-    Worker->>Worker: Run Z-Score (O(1))
-    Worker->>Worker: Run Isolation Forest
-    Worker->>DB: Persist Metric & Flags
-    Worker-->>Frontend: Broadcast SSE (JSON)
-    Frontend->>Frontend: Trigger Framer Motion Alerts
+    alt is_anomaly == True
+        W->>A: Trigger Alert
+        A->>Slack: Webhook POST
+    end
+    
+    W->>F: Stream via SSE
+    F-->>User: Visualise on Dashboard
 ```
 
-### 🗄 Database Schema (ER Diagram)
+### 3. Tech Distribution
 
 ```mermaid
-erDiagram
-    METRICS {
-        timestamp ts PK
-        string metric
-        float value
-        boolean is_anomaly_zscore
-        boolean is_anomaly_iforest
-    }
-    ANOMALIES {
-        timestamp ts PK
-        string metric
-        float value
-        string detector
-        float severity
-    }
-    METRICS ||--o{ ANOMALIES : triggers
+pie title Technology Distribution
+    "Backend Logic (FastAPI)" : 40
+    "ML Engine (Scikit-Learn)": 25
+    "Frontend (React/Vite)"   : 25
+    "Database (SQLite)"       : 10
 ```
 
 ---
 
-## 💻 Tech Stack & Analytics
-
-<div align="center">
-  <img src="https://skillicons.dev/icons?i=react,vite,python,fastapi,redis,postgres,docker,github&theme=dark" />
-</div>
-
-<br />
-
-<details>
-<summary><b>View GitHub Activity & Stats</b></summary>
-<br />
-<div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=AyushGU12&show_icons=true&theme=tokyonight&hide_border=true" />
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=AyushGU12&theme=tokyonight&hide_border=true" />
-</div>
-</details>
-
----
-
-## 📂 Project Structure
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 120">
+  <defs>
+    <pattern id="hexbg3" width="30" height="34.6" patternUnits="userSpaceOnUse">
+      <polygon points="15,0 30,8.66 30,25.98 15,34.64 0,25.98 0,8.66"
+               fill="none" stroke="#6366f1" stroke-width="0.4" opacity="0.25"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="120" fill="#0d1117"/>
+  <rect width="900" height="120" fill="url(#hexbg3)"/>
+  <text x="450" y="68" text-anchor="middle"
+        font-size="36" fill="url(#hgrad)"
+        font-family="'Segoe UI', Arial Black" font-weight="900">
+    ✨ DIRECTORY STRUCTURE ✨
+  </text>
+</svg>
 
 ```text
 📦 chronoshield
- ┣ 📂 backend
- ┃ ┣ 📂 db               # TimescaleDB & SQLite connection logic
- ┃ ┣ 📂 detectors        # Z-Score & IForest algorithm implementations
- ┃ ┣ 📂 tests            # Pytest suites
- ┃ ┣ 📜 api.py           # FastAPI SSE Endpoints
- ┃ ┣ 📜 worker.py        # Stream consumption & detection pipeline
- ┃ ┣ 📜 generator.py     # Synthetic data generation
- ┃ ┗ 📜 requirements.txt
- ┣ 📂 frontend
- ┃ ┣ 📂 src
- ┃ ┃ ┣ 📂 components     # Recharts & Framer Motion UI
- ┃ ┃ ┣ 📂 hooks          # React SSE bindings
- ┃ ┃ ┣ 📜 App.jsx        # Glassmorphic grid layout
- ┃ ┃ ┗ 📜 index.css      # Design tokens & CSS vars
- ┃ ┣ 📜 package.json
- ┃ ┗ 📜 vite.config.js
- ┣ 📜 docker-compose.yml
- ┣ 📜 .env
- ┗ 📜 README.md
+├── 📂 backend
+│   ├── 📂 db
+│   │   ├── 📜 init_db.py         ← Database initialisation
+│   │   └── 📜 store.py           ← Persistence layer & data purging
+│   ├── 📂 detectors
+│   │   ├── 📜 isolation_forest.py← Scikit-Learn iForest detector
+│   │   └── 📜 zscore.py          ← Adaptive rolling Z-Score detector
+│   ├── 📂 tests                  ← Pytest suite
+│   ├── 📜 alert_manager.py       ← Slack webhook integration
+│   ├── 📜 api.py                 ← FastAPI server & SSE router
+│   ├── 📜 config.py              ← Environment configuration
+│   ├── 📜 generator.py           ← Multi-metric telemetry simulator
+│   ├── 📜 requirements.txt       ← Python dependencies
+│   └── 📜 worker.py              ← Core inference daemon & queue processing
+├── 📂 frontend
+│   ├── 📂 src
+│   │   ├── 📂 components         ← React UI (Charts, Modals, KPIs)
+│   │   ├── 📂 hooks              ← SSE streaming hooks
+│   │   ├── 📜 App.jsx            ← Router & Layout
+│   │   ├── 📜 index.css          ← Cyberpunk Glassmorphism styles
+│   │   └── 📜 main.jsx           ← Entry point
+│   ├── 📜 package.json           ← Node dependencies
+│   └── 📜 vite.config.js         ← Vite build & proxy config
+├── 📜 start_backend.bat          ← Launch script
+└── 📜 start_frontend.bat         ← Launch script
 ```
 
 ---
 
-## ✨ Features
-
-### ✅ Completed
-- [x] **Dual Detection Engine:** Z-Score and Isolation Forest running in parallel.
-- [x] **Live SSE Streaming:** Zero-polling, instant data propagation from backend to frontend.
-- [x] **Glassmorphic UI:** Premium React/Vite dashboard with Framer Motion micro-animations.
-- [x] **Advanced Charting:** Recharts Area charts with custom glowing SVG anomaly indicators.
-- [x] **Database Agnostic:** Fallback to SQLite if TimescaleDB/Postgres is unavailable.
-
-### 🔄 In Progress
-- [ ] **Slack/Discord Alerting:** Webhook integration for severe anomalies.
-- [ ] **Dynamic Threshold Tuning:** UI sliders to adjust detection sensitivity on the fly.
-
-### 📌 Planned
-- [ ] **Autoencoder Neural Networks:** Deep learning path for complex multivariate metrics.
-- [ ] **Kubernetes Helm Charts:** For enterprise scale deployments.
-
----
-
-## 🚀 Installation & Setup
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Docker & Docker Compose (Optional but recommended)
-
-### 🐳 Docker Production Setup (Recommended)
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 120">
+  <defs>
+    <pattern id="hexbg4" width="30" height="34.6" patternUnits="userSpaceOnUse">
+      <polygon points="15,0 30,8.66 30,25.98 15,34.64 0,25.98 0,8.66"
+               fill="none" stroke="#6366f1" stroke-width="0.4" opacity="0.25"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="120" fill="#0d1117"/>
+  <rect width="900" height="120" fill="url(#hexbg4)"/>
+  <text x="450" y="68" text-anchor="middle"
+        font-size="36" fill="url(#hgrad)"
+        font-family="'Segoe UI', Arial Black" font-weight="900">
+    ✨ INSTALLATION & CONFIG ✨
+  </text>
+</svg>
 
 ```bash
-# Clone the repository
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🔥 Step 1 — Clone repository
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 git clone https://github.com/AyushGU12/chronoshield.git
 cd chronoshield
 
-# Start the entire stack (Redis, TimescaleDB, Backend, Frontend)
-docker-compose up -d --build
-```
-> The dashboard will be available at `http://localhost:5173`
-
-### 💻 Local Development Setup
-
-<details>
-<summary><b>Backend Setup (FastAPI)</b></summary>
-
-```bash
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# ⚙️ Step 2 — Backend Setup
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 cd backend
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+.venv\Scripts\activate
 pip install -r requirements.txt
+python -m db.init_db
 
-# Start the backend (Defaults to SQLite and In-Memory Queue)
-../start_backend.bat
-```
-</details>
-
-<details>
-<summary><b>Frontend Setup (React/Vite)</b></summary>
-
-```bash
-cd frontend
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🖥️ Step 3 — Frontend Setup
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+cd ../frontend
 npm install
 
-# Start the dev server
-../start_frontend.bat
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 🚀 Step 4 — Launch servers
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# In terminal 1:
+.\start_backend.bat
+# In terminal 2:
+.\start_frontend.bat
 ```
-</details>
+
+### Environment Variables (`backend/.env`)
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DB_MODE` | ❌ | `sqlite` | `sqlite` or `timescaledb` |
+| `ALERT_MODE` | ❌ | `console` | Set to `slack` for webhooks |
+| `SLACK_WEBHOOK_URL`| ⚡ | — | URL for slack notifications |
+| `GENERATOR_RATE` | ❌ | `1.0` | Telemetry points per second |
 
 ---
 
-## 📡 API Documentation
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 120">
+  <defs>
+    <pattern id="hexbg5" width="30" height="34.6" patternUnits="userSpaceOnUse">
+      <polygon points="15,0 30,8.66 30,25.98 15,34.64 0,25.98 0,8.66"
+               fill="none" stroke="#6366f1" stroke-width="0.4" opacity="0.25"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="120" fill="#0d1117"/>
+  <rect width="900" height="120" fill="url(#hexbg5)"/>
+  <text x="450" y="68" text-anchor="middle"
+        font-size="36" fill="url(#hgrad)"
+        font-family="'Segoe UI', Arial Black" font-weight="900">
+    ✨ KEY FEATURES & ML PIPELINE ✨
+  </text>
+</svg>
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | `GET` | Health check endpoint |
-| `/api/stream` | `GET` | **SSE Stream**. Pushes live JSON metrics and anomaly flags |
-| `/api/metrics` | `GET` | Retrieve historical metric data from DB |
-| `/api/stats` | `GET` | Retrieve precision/recall statistics for both models |
-| `/api/inject` | `POST` | Manually inject a synthetic anomaly into the stream |
+- **Warm Starts:** Pre-loads the last 200 data points on server boot, ensuring immediate model calibration and zero blind spots.
+- **Dynamic Threshold Tuning:** Exposes an API endpoint (`POST /api/config`) to hot-swap model sensitivity parameters directly from the React UI without dropping streams.
+- **Automated Data Purging:** Background workers execute intelligent TTL sweeps every hour, preventing SQLite/TimescaleDB bloat by dropping data older than 7 days.
+- **Multivariate Tracking:** Independently trains rolling models for `cpu`, `memory`, and `latency` in isolated dictionaries within the worker loop.
+- **Slack Alert Integration:** Instantly broadcasts severe anomalies (severity > 0.8) directly to your SRE Slack channel.
 
----
-
-## 🔐 Security & Reliability
-
-- **CORS Configuration:** Strictly scoped to frontend origins (`localhost:5173`, etc).
-- **Data Protection:** Prepared statements and ORM abstraction to prevent SQL Injection.
-- **Fail-Safes:** Background threads gracefully degrade to in-memory queues if Redis is unreachable.
-
----
-
-## ⚡ Performance & Scalability
-
-- **Time Complexity:** The Rolling Z-Score detector executes in exactly **O(1)** time using running sums.
-- **Concurrency:** FastAPI's `asyncio` combined with `threading.Event` allows thousands of SSE clients to subscribe to the single worker broadcast without blocking the detection loop.
-- **Database Indexing:** TimescaleDB hypertable indexes on `(metric, timestamp DESC)` for lightning-fast historical queries.
-
----
-
-## 🧪 Testing Strategy
-
-Run the backend test suite:
-```bash
-cd backend
-pytest tests/ -v --cov=.
-```
-- **Unit Tests:** Ensures mathematical correctness of Z-Score bounding and normalisation.
-- **Integration Tests:** Validates stream queuing and SSE broadcast logic.
+### ML Stack
+<div align="center">
+<img src="https://skillicons.dev/icons?i=python,react,vite,fastapi,sqlite,docker&theme=dark&perline=8"/>
+</div>
 
 ---
 
-## 📈 Monitoring & Observability
-
-- **Logs:** Structured standard output for all pipeline components.
-- **Dashboard Stats:** The UI actively monitors Model Precision & Recall based on injected synthetic spikes vs caught spikes.
-
----
-
-## 🤝 Contributing
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m '✨ Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=140&section=footer&animation=twinkling)
 
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:9D4EDD,100:00E5FF&height=100&section=footer" width="100%" />
-  
-  <p><b>Built with ❤️ by <a href="https://github.com/AyushGU12">AyushGU12</a></b></p>
-  <p><i>If this project helped you, please consider giving it a ⭐ on GitHub!</i></p>
+
+⭐ **Star this repo** if you found it useful! <br>
+Made with ❤️ by [AyushGU12](https://github.com/AyushGU12)
+
 </div>
