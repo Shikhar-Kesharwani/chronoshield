@@ -25,6 +25,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from typing import Optional
 
 from config import API_HOST, API_PORT, CORS_ORIGINS
 from db.init_db import init_db
@@ -133,8 +134,8 @@ def inject_anomaly():
 
 
 class ConfigUpdate(BaseModel):
-    zscore_threshold: float = None
-    iforest_contamination: float = None
+    zscore_threshold: Optional[float] = None
+    iforest_contamination: Optional[float] = None
 
 
 @app.post("/api/config")
@@ -156,13 +157,13 @@ def stream_metrics():
 
     def event_generator():
         snapshot, wake_event = subscribe_sse()
-        sent_count = 0
+        last_ts = ""
 
         # Send historical snapshot first so the chart loads immediately
         for point in snapshot:
             data = json.dumps(point)
             yield f"data: {data}\n\n"
-            sent_count += 1
+            last_ts = point["ts"]
 
         try:
             while True:
@@ -176,13 +177,13 @@ def stream_metrics():
                 from worker import _sse_buffer, _sse_lock
 
                 with _sse_lock:
-                    new_points = list(_sse_buffer)[sent_count:]
+                    new_points = [p for p in list(_sse_buffer) if not last_ts or p["ts"] > last_ts]
                     wake_event.clear()
 
                 for point in new_points:
                     data = json.dumps(point)
                     yield f"data: {data}\n\n"
-                    sent_count += 1
+                    last_ts = point["ts"]
         except GeneratorExit:
             pass
         finally:

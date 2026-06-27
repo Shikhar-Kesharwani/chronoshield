@@ -45,8 +45,8 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="custom-tooltip">
         <div className="tooltip-time">{timeStr}</div>
         <div className="tooltip-row">
-          <span className="tooltip-label">CPU Usage:</span>
-          <span className="tooltip-val value">{data.value.toFixed(2)}%</span>
+          <span className="tooltip-label">{data.metric ? data.metric.toUpperCase() : 'METRIC'} Usage:</span>
+          <span className="tooltip-val value">{data.value.toFixed(2)}{data.metric === 'latency' ? 'ms' : '%'}</span>
         </div>
         
         {data.z_upper != null && (

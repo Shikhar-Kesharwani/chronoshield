@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const MAX_POINTS = 300;
 
-export function useMetricStream() {
+export function useMetricStream(targetMetric = "cpu") {
   const [points,    setPoints]    = useState([]);
   const [anomalies, setAnomalies] = useState([]);
   const [connected, setConnected] = useState(false);
@@ -14,13 +14,18 @@ export function useMetricStream() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const r = await fetch(`${API_BASE}/api/stats?metric=cpu`);
+      const r = await fetch(`${API_BASE}/api/stats?metric=${targetMetric}`);
       const d = await r.json();
       setStats(d.stats);
     } catch (_) {}
-  }, []);
+  }, [targetMetric]);
 
   useEffect(() => {
+    // Reset state on metric change
+    setPoints([]);
+    setAnomalies([]);
+    setStats(null);
+    
     // Poll stats every 10 s
     fetchStats();
     const statsInterval = setInterval(fetchStats, 10_000);
@@ -34,6 +39,8 @@ export function useMetricStream() {
     es.onmessage = (evt) => {
       try {
         const point = JSON.parse(evt.data);
+        if (point.metric !== targetMetric) return; // Strict metric filtering
+        
         setPoints(prev => {
           const next = [...prev, point];
           return next.length > MAX_POINTS ? next.slice(next.length - MAX_POINTS) : next;
@@ -53,7 +60,7 @@ export function useMetricStream() {
       es.close();
       clearInterval(statsInterval);
     };
-  }, [fetchStats]);
+  }, [fetchStats, targetMetric]);
 
   const injectAnomaly = useCallback(async () => {
     try {
