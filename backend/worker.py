@@ -22,8 +22,9 @@ from config import ZSCORE_THRESHOLD, IFOREST_CONTAMINATION
 from generator import read_next
 from detectors.zscore import ZScoreDetector
 from detectors.isolation_forest import IsolationForestDetector
-from db.store import insert_metric, insert_anomaly_event
+from db.store import insert_metric, insert_anomaly_event, fetch_metrics, purge_old_data
 from alert_manager import maybe_alert
+import time
 
 log = logging.getLogger(__name__)
 
@@ -69,9 +70,48 @@ _iforest_detectors: Dict[str, IsolationForestDetector] = {}
 
 def _get_detectors(metric: str):
     if metric not in _zscore_detectors:
-        _zscore_detectors[metric]  = ZScoreDetector()
-        _iforest_detectors[metric] = IsolationForestDetector()
+        zd = ZScoreDetector()
+        ifd = IsolationForestDetector()
+        
+        # ── WARM START: Fetch last 200 points to prime the detectors ──
+        log.info(f"Warm starting detectors for metric '{metric}'...")
+        historical = fetch_metrics(metric=metric, limit=200)
+        # fetch_metrics returns newest first, so we reverse to feed chronologically
+        for row in reversed(historical):
+            val = float(row["value"])
+            zd.update(val)
+            ifd.update(val)
+            
+        _zscore_detectors[metric] = zd
+        _iforest_detectors[metric] = ifd
+        log.info(f"Detectors for '{metric}' primed with {len(historical)} historical points.")
+        
     return _zscore_detectors[metric], _iforest_detectors[metric]
+
+
+def update_detector_config(zscore_threshold: float = None, iforest_contamination: float = None):
+    """Dynamically update thresholds for all active detectors."""
+    for metric, zd in _zscore_detectors.items():
+        if zscore_threshold is not None:
+            zd.threshold = zscore_threshold
+    for metric, ifd in _iforest_detectors.items():
+        if iforest_contamination is not None:
+            ifd.contamination = iforest_contamination
+    log.info(f"Updated detector configs: ZScore={zscore_threshold}, IForest={iforest_contamination}")
+
+
+# ── Data Retention Daemon ─────────────────────────────────────────────────────
+
+def _retention_worker():
+    """Runs every hour to purge data older than 7 days."""
+    while True:
+        try:
+            purge_old_data(days=7)
+        except Exception as e:
+            log.error(f"Retention worker error: {e}")
+        time.sleep(3600)  # Sleep for 1 hour
+
+threading.Thread(target=_retention_worker, daemon=True).start()
 
 
 # ── Main processing loop ───────────────────────────────────────────────────────

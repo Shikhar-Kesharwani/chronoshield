@@ -94,6 +94,27 @@ def insert_anomaly_event(
         _close_pg(conn)
 
 
+def purge_old_data(days: int = 7) -> None:
+    """Delete metrics older than X days to prevent DB bloat."""
+    conn = _get_conn()
+    ph = "%s" if DB_MODE == "timescaledb" else "?"
+    if DB_MODE == "timescaledb":
+        sql = f"DELETE FROM metrics WHERE ts < NOW() - INTERVAL '{days} days'"
+        params = ()
+    else:
+        sql = f"DELETE FROM metrics WHERE ts < datetime('now', '-{days} days')"
+        params = ()
+    
+    try:
+        with conn:
+            conn.execute(sql, params)
+        log.info(f"Purged metrics data older than {days} days.")
+    except Exception as e:
+        log.error(f"purge_old_data error: {e}")
+    finally:
+        _close_pg(conn)
+
+
 # ── Read helpers ───────────────────────────────────────────────────────────────
 
 def _row_to_dict(row) -> Dict[str, Any]:

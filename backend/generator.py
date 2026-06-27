@@ -60,62 +60,66 @@ def _push(message: Dict[str, Any]):
         _mock_queue.put(message)
 
 
-def run_generator(metric: str = "cpu", stop_event: threading.Event = None):
+def run_generator(stop_event: threading.Event = None):
     """
-    Continuously generate and push metric data points.
-
-    Args:
-        metric: name of the metric being simulated ("cpu", "latency", etc.)
-        stop_event: optional threading.Event to signal shutdown
+    Continuously generate and push metric data points for multiple metrics.
     """
     interval = 1.0 / GENERATOR_RATE
     tick = 0
-    log.info(f"Generator started — metric={metric}, rate={GENERATOR_RATE}/s, mode={REDIS_MODE}")
+    log.info(f"Generator started — metrics=[cpu, memory, latency], rate={GENERATOR_RATE}/s, mode={REDIS_MODE}")
 
-    # CPU baseline: oscillates between ~20% and ~60% over a 5-minute cycle
-    BASE_MEAN    = 40.0
-    BASE_AMP     = 20.0
-    PERIOD_TICKS = 300  # one full sine cycle every 5 minutes at 1 Hz
+    # Baseline params
+    metrics = {
+        "cpu": {"mean": 40.0, "amp": 20.0, "noise": 3.0, "clamp": (0.0, 100.0)},
+        "memory": {"mean": 65.0, "amp": 10.0, "noise": 1.0, "clamp": (0.0, 100.0)},
+        "latency": {"mean": 150.0, "amp": 40.0, "noise": 15.0, "clamp": (10.0, 2000.0)},
+    }
+    PERIOD_TICKS = 300
 
     while True:
         if stop_event and stop_event.is_set():
             log.info("Generator stopping.")
             break
 
-        # ── Base signal ──
         t = tick / PERIOD_TICKS
-        base  = BASE_MEAN + BASE_AMP * math.sin(2 * math.pi * t)
-        noise = random.gauss(0, 3.0)
-        value = base + noise
-
-        injected = False
-
+        
         # ── Manual spike injection ──
+        manual_spike = False
         if _manual_inject_event.is_set():
-            spike_size = random.uniform(30, 60)
-            value += spike_size
-            injected = True
+            manual_spike = True
             _manual_inject_event.clear()
-            log.info(f"Manual anomaly injected: {value:.2f}")
+            
+        for metric, p in metrics.items():
+            base  = p["mean"] + p["amp"] * math.sin(2 * math.pi * t)
+            noise = random.gauss(0, p["noise"])
+            value = base + noise
+            injected = False
 
-        # ── Automatic random anomaly ──
-        elif random.random() < GENERATOR_ANOMALY_PROB:
-            spike_size = random.choice([-1, 1]) * random.uniform(20, 50)
-            value += spike_size
-            injected = True
-            log.debug(f"Auto anomaly injected: {value:.2f}")
+            if manual_spike:
+                if metric == "cpu": spike = random.uniform(30, 60)
+                elif metric == "memory": spike = random.uniform(15, 30)
+                else: spike = random.uniform(300, 800)
+                value += spike
+                injected = True
+                log.info(f"Manual anomaly injected on {metric}: {value:.2f}")
+            elif random.random() < GENERATOR_ANOMALY_PROB:
+                if metric == "cpu": spike = random.choice([-1, 1]) * random.uniform(20, 50)
+                elif metric == "memory": spike = random.choice([-1, 1]) * random.uniform(10, 25)
+                else: spike = random.choice([-1, 1]) * random.uniform(200, 600)
+                value += spike
+                injected = True
+                log.debug(f"Auto anomaly injected on {metric}: {value:.2f}")
 
-        # Clamp CPU to [0, 100]
-        if metric == "cpu":
-            value = max(0.0, min(100.0, value))
+            # Clamp
+            value = max(p["clamp"][0], min(p["clamp"][1], value))
 
-        message = {
-            "ts":       datetime.now(timezone.utc).isoformat(),
-            "metric":   metric,
-            "value":    f"{value:.4f}",
-            "injected": "1" if injected else "0",
-        }
-        _push(message)
+            message = {
+                "ts":       datetime.now(timezone.utc).isoformat(),
+                "metric":   metric,
+                "value":    f"{value:.4f}",
+                "injected": "1" if injected else "0",
+            }
+            _push(message)
 
         tick += 1
         time.sleep(interval)

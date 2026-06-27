@@ -19,15 +19,16 @@ import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 
 from config import API_HOST, API_PORT, CORS_ORIGINS
 from db.init_db import init_db
 from db.store import fetch_metrics, fetch_anomaly_events, fetch_detector_stats
 from generator import run_generator, trigger_manual_anomaly
-from worker import run_worker, subscribe_sse, unsubscribe_sse
+from worker import run_worker, subscribe_sse, unsubscribe_sse, update_detector_config
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ async def lifespan(app: FastAPI):
     log.info("Starting background threads …")
     gen_thread = threading.Thread(
         target=run_generator,
-        kwargs={"metric": "cpu", "stop_event": _stop_event},
+        kwargs={"stop_event": _stop_event},
         daemon=True, name="generator",
     )
     worker_thread = threading.Thread(
@@ -120,6 +121,20 @@ def inject_anomaly():
     """Manually inject an anomaly spike into the metric stream."""
     trigger_manual_anomaly()
     return {"status": "queued", "message": "Anomaly will be injected on next generator tick."}
+
+
+class ConfigUpdate(BaseModel):
+    zscore_threshold: float = None
+    iforest_contamination: float = None
+
+@app.post("/api/config")
+def update_config(config: ConfigUpdate):
+    """Dynamically update detection thresholds."""
+    update_detector_config(
+        zscore_threshold=config.zscore_threshold,
+        iforest_contamination=config.iforest_contamination
+    )
+    return {"status": "success", "config": config.dict(exclude_unset=True)}
 
 
 @app.get("/api/stream")
