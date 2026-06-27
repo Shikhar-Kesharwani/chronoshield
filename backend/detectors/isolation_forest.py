@@ -12,16 +12,18 @@ The IsolationForest natively handles multivariate data — pass additional
 features (e.g., rate-of-change) to make it more expressive.
 """
 
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from collections import deque
-from typing import Tuple, List, Optional
 import logging
+from collections import deque
+from typing import List, Optional, Tuple
+
 import numpy as np
 
-from config import IFOREST_WINDOW, IFOREST_CONTAMINATION
+from config import IFOREST_CONTAMINATION, IFOREST_WINDOW
 
 log = logging.getLogger(__name__)
 

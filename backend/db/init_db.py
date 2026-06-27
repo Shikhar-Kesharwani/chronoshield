@@ -3,21 +3,16 @@ db/init_db.py — Database initialisation
 Supports TimescaleDB (Postgres) and SQLite (fallback, no Docker required).
 """
 
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import sqlite3
 import logging
-from config import (
-    DB_MODE,
-    SQLITE_PATH,
-    TIMESCALE_HOST,
-    TIMESCALE_PORT,
-    TIMESCALE_DB,
-    TIMESCALE_USER,
-    TIMESCALE_PASS,
-)
+import sqlite3
+
+from config import (DB_MODE, SQLITE_PATH, TIMESCALE_DB, TIMESCALE_HOST,
+                    TIMESCALE_PASS, TIMESCALE_PORT, TIMESCALE_USER)
 
 log = logging.getLogger(__name__)
 

@@ -10,26 +10,21 @@ Generates realistic time-series data with:
 Pushes each data point to the configured stream (Redis or in-process queue).
 """
 
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-import time
+import logging
 import math
 import random
 import threading
-import logging
+import time
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 
-from config import (
-    REDIS_MODE,
-    REDIS_HOST,
-    REDIS_PORT,
-    REDIS_STREAM_KEY,
-    GENERATOR_RATE,
-    GENERATOR_ANOMALY_PROB,
-)
+from config import (GENERATOR_ANOMALY_PROB, GENERATOR_RATE, REDIS_HOST,
+                    REDIS_MODE, REDIS_PORT, REDIS_STREAM_KEY)
 
 log = logging.getLogger(__name__)
 

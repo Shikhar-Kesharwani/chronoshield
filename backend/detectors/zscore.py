@@ -11,16 +11,17 @@ Returns a severity score normalised to [0, 1] based on how far |z| exceeds
 the threshold:  severity = min(1.0,  (|z| − threshold) / threshold)
 """
 
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from collections import deque
-from typing import Tuple, Optional
-import math
 import logging
+import math
+from collections import deque
+from typing import Optional, Tuple
 
-from config import ZSCORE_WINDOW, ZSCORE_THRESHOLD
+from config import ZSCORE_THRESHOLD, ZSCORE_WINDOW
 
 log = logging.getLogger(__name__)
 

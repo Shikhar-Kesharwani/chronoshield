@@ -10,27 +10,24 @@ Flow:
      deque so SSE subscribers in api.py can pick it up instantly.
 """
 
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-import threading
 import logging
+import threading
+import time
 from collections import deque
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
-from generator import read_next
-from detectors.zscore import ZScoreDetector
-from detectors.isolation_forest import IsolationForestDetector
-from db.store import (
-    insert_metric,
-    insert_anomaly_event,
-    fetch_metrics,
-    purge_old_data,
-)
 from alert_manager import maybe_alert
-import time
+from db.store import (fetch_metrics, insert_anomaly_event, insert_metric,
+                      purge_old_data)
+from detectors.isolation_forest import IsolationForestDetector
+from detectors.zscore import ZScoreDetector
+from generator import read_next
 
 log = logging.getLogger(__name__)
 

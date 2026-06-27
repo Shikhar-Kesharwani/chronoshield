@@ -10,13 +10,14 @@ Endpoints:
   GET  /api/stream              — Server-Sent Events live data stream
 """
 
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
 import json
-import threading
 import logging
+import threading
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -27,14 +28,10 @@ from pydantic import BaseModel
 
 from config import API_HOST, API_PORT, CORS_ORIGINS
 from db.init_db import init_db
-from db.store import fetch_metrics, fetch_anomaly_events, fetch_detector_stats
+from db.store import fetch_anomaly_events, fetch_detector_stats, fetch_metrics
 from generator import run_generator, trigger_manual_anomaly
-from worker import (
-    run_worker,
-    subscribe_sse,
-    unsubscribe_sse,
-    update_detector_config,
-)
+from worker import (run_worker, subscribe_sse, unsubscribe_sse,
+                    update_detector_config)
 
 log = logging.getLogger(__name__)
 

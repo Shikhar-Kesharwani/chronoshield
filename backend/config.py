@@ -4,6 +4,7 @@ config.py — Centralised configuration loaded from .env
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load .env from the project root (one level above backend/)

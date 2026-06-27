@@ -10,16 +10,18 @@ To enable Slack:
   2. Set ALERT_MODE=slack and SLACK_WEBHOOK_URL=https://hooks.slack.com/...
 """
 
-import sys, os
+import os
+import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 
 import logging
-import requests
 from datetime import datetime
 from typing import Dict
 
-from config import ALERT_MODE, SLACK_WEBHOOK_URL, ALERT_SEVERITY_THRESHOLD
+import requests
+
+from config import ALERT_MODE, ALERT_SEVERITY_THRESHOLD, SLACK_WEBHOOK_URL
 
 log = logging.getLogger(__name__)
 
