@@ -2,15 +2,21 @@
 db/init_db.py — Database initialisation
 Supports TimescaleDB (Postgres) and SQLite (fallback, no Docker required).
 """
+
 import sys, os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import sqlite3
 import logging
 from config import (
-    DB_MODE, SQLITE_PATH,
-    TIMESCALE_HOST, TIMESCALE_PORT,
-    TIMESCALE_DB, TIMESCALE_USER, TIMESCALE_PASS,
+    DB_MODE,
+    SQLITE_PATH,
+    TIMESCALE_HOST,
+    TIMESCALE_PORT,
+    TIMESCALE_DB,
+    TIMESCALE_USER,
+    TIMESCALE_PASS,
 )
 
 log = logging.getLogger(__name__)
@@ -48,14 +54,20 @@ def get_connection():
     if DB_MODE == "timescaledb":
         try:
             import psycopg2
+
             conn = psycopg2.connect(
-                host=TIMESCALE_HOST, port=TIMESCALE_PORT,
-                dbname=TIMESCALE_DB, user=TIMESCALE_USER,
-                password=TIMESCALE_PASS, connect_timeout=5,
+                host=TIMESCALE_HOST,
+                port=TIMESCALE_PORT,
+                dbname=TIMESCALE_DB,
+                user=TIMESCALE_USER,
+                password=TIMESCALE_PASS,
+                connect_timeout=5,
             )
             return conn
         except Exception as e:
-            log.warning(f"TimescaleDB unavailable ({e}). Falling back to SQLite.")
+            log.warning(
+                f"TimescaleDB unavailable ({e}). Falling back to SQLite."
+            )
 
     # SQLite fallback
     conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)
@@ -69,15 +81,21 @@ def init_db():
 
     if DB_MODE == "timescaledb":
         # Use psycopg2-compatible schema
-        pg_metrics = _CREATE_METRICS \
-            .replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY") \
-            .replace("INTEGER DEFAULT 0", "SMALLINT DEFAULT 0") \
-            .replace("INTEGER   DEFAULT 0", "SMALLINT DEFAULT 0") \
+        pg_metrics = (
+            _CREATE_METRICS.replace(
+                "INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY"
+            )
+            .replace("INTEGER DEFAULT 0", "SMALLINT DEFAULT 0")
+            .replace("INTEGER   DEFAULT 0", "SMALLINT DEFAULT 0")
             .replace("TIMESTAMP", "TIMESTAMPTZ")
-        pg_anomalies = _CREATE_ANOMALIES \
-            .replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY") \
-            .replace("INTEGER   DEFAULT 0", "SMALLINT DEFAULT 0") \
+        )
+        pg_anomalies = (
+            _CREATE_ANOMALIES.replace(
+                "INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY"
+            )
+            .replace("INTEGER   DEFAULT 0", "SMALLINT DEFAULT 0")
             .replace("TIMESTAMP", "TIMESTAMPTZ")
+        )
 
         with conn:
             cur = conn.cursor()

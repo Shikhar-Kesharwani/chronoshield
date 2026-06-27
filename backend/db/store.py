@@ -1,7 +1,9 @@
 """
 db/store.py — Database write/read helpers (SQLite & TimescaleDB compatible)
 """
+
 import sys, os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import sqlite3
@@ -33,6 +35,7 @@ def _close_pg(conn):
 
 
 # ── Write helpers ──────────────────────────────────────────────────────────────
+
 
 def insert_metric(
     ts: datetime,
@@ -87,7 +90,17 @@ def insert_anomaly_event(
     """
     try:
         with conn:
-            conn.execute(sql, (ts.isoformat(), metric, value, detector, severity, int(alerted)))
+            conn.execute(
+                sql,
+                (
+                    ts.isoformat(),
+                    metric,
+                    value,
+                    detector,
+                    severity,
+                    int(alerted),
+                ),
+            )
     except Exception as e:
         log.error(f"insert_anomaly_event error: {e}")
     finally:
@@ -97,14 +110,13 @@ def insert_anomaly_event(
 def purge_old_data(days: int = 7) -> None:
     """Delete metrics older than X days to prevent DB bloat."""
     conn = _get_conn()
-    ph = "%s" if DB_MODE == "timescaledb" else "?"
     if DB_MODE == "timescaledb":
         sql = f"DELETE FROM metrics WHERE ts < NOW() - INTERVAL '{days} days'"
         params = ()
     else:
         sql = f"DELETE FROM metrics WHERE ts < datetime('now', '-{days} days')"
         params = ()
-    
+
     try:
         with conn:
             conn.execute(sql, params)
@@ -116,6 +128,7 @@ def purge_old_data(days: int = 7) -> None:
 
 
 # ── Read helpers ───────────────────────────────────────────────────────────────
+
 
 def _row_to_dict(row) -> Dict[str, Any]:
     if isinstance(row, sqlite3.Row):
@@ -217,8 +230,8 @@ def fetch_detector_stats(metric: str = "cpu") -> Dict[str, Any]:
         def _safe(num, den):
             return round(num / den, 4) if den else 0.0
 
-        ti  = d.get("total_injected") or 0
-        zd  = d.get("zscore_detected") or 0
+        ti = d.get("total_injected") or 0
+        zd = d.get("zscore_detected") or 0
         ifd = d.get("iforest_detected") or 0
         ztp = d.get("zscore_tp") or 0
         itp = d.get("iforest_tp") or 0

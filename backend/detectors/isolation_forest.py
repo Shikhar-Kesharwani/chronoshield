@@ -11,7 +11,9 @@ Algorithm:
 The IsolationForest natively handles multivariate data — pass additional
 features (e.g., rate-of-change) to make it more expressive.
 """
+
 import sys, os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from collections import deque
@@ -25,10 +27,13 @@ log = logging.getLogger(__name__)
 
 try:
     from sklearn.ensemble import IsolationForest as _IF
+
     _SKLEARN_AVAILABLE = True
 except ImportError:
     _SKLEARN_AVAILABLE = False
-    log.warning("scikit-learn not installed — IsolationForest detector disabled.")
+    log.warning(
+        "scikit-learn not installed — IsolationForest detector disabled."
+    )
 
 
 class IsolationForestDetector:
@@ -45,20 +50,22 @@ class IsolationForestDetector:
         contamination: float = IFOREST_CONTAMINATION,
         retrain_every: int = 50,
     ):
-        self.window        = window
+        self.window = window
         self.contamination = contamination
         self.retrain_every = retrain_every
 
         self._buf: deque = deque(maxlen=window)
         self._model: Optional[object] = None
-        self._trained: bool  = False
+        self._trained: bool = False
         self._last_value: Optional[float] = None
         self._points_since_retrain: int = 0
         self._score_min: float = -0.5
         self._score_max: float = 0.5
 
     def _build_features(self, value: float) -> List[float]:
-        delta = value - self._last_value if self._last_value is not None else 0.0
+        delta = (
+            value - self._last_value if self._last_value is not None else 0.0
+        )
         return [value, delta]
 
     def _train(self):
@@ -79,7 +86,9 @@ class IsolationForestDetector:
         self._score_min = float(scores.min())
         self._score_max = float(scores.max())
         self._trained = True
-        log.debug(f"IForest retrained on {len(X)} pts — score range [{self._score_min:.3f}, {self._score_max:.3f}]")
+        log.debug(
+            f"IForest retrained on {len(X)} pts — score range [{self._score_min:.3f}, {self._score_max:.3f}]"
+        )
 
     def _normalise_score(self, raw_score: float) -> float:
         """
@@ -109,8 +118,11 @@ class IsolationForestDetector:
         self._points_since_retrain += 1
 
         # Trigger (re)training
-        if (not self._trained and len(self._buf) >= max(10, self.window // 4)) or \
-           (self._trained and self._points_since_retrain >= self.retrain_every):
+        if (
+            not self._trained and len(self._buf) >= max(10, self.window // 4)
+        ) or (
+            self._trained and self._points_since_retrain >= self.retrain_every
+        ):
             self._train()
             self._points_since_retrain = 0
 
@@ -119,16 +131,16 @@ class IsolationForestDetector:
 
         arr = np.array([features])
         raw_score = float(self._model.decision_function(arr)[0])
-        label     = self._model.predict(arr)[0]  # -1 = anomaly, 1 = normal
+        label = self._model.predict(arr)[0]  # -1 = anomaly, 1 = normal
 
         is_anomaly = bool(label == -1)
-        severity   = self._normalise_score(raw_score) if is_anomaly else 0.0
+        severity = self._normalise_score(raw_score) if is_anomaly else 0.0
 
         return is_anomaly, severity, raw_score
 
     def reset(self):
         self._buf.clear()
-        self._model    = None
-        self._trained  = False
+        self._model = None
+        self._trained = False
         self._last_value = None
         self._points_since_retrain = 0

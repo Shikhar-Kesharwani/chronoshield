@@ -9,17 +9,18 @@ Endpoints:
   POST /api/inject              — manually inject an anomaly spike
   GET  /api/stream              — Server-Sent Events live data stream
 """
+
 import sys, os
+
 sys.path.insert(0, os.path.dirname(__file__))
 
 import json
-import time
 import threading
 import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI, Query, Body
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -28,7 +29,12 @@ from config import API_HOST, API_PORT, CORS_ORIGINS
 from db.init_db import init_db
 from db.store import fetch_metrics, fetch_anomaly_events, fetch_detector_stats
 from generator import run_generator, trigger_manual_anomaly
-from worker import run_worker, subscribe_sse, unsubscribe_sse, update_detector_config
+from worker import (
+    run_worker,
+    subscribe_sse,
+    unsubscribe_sse,
+    update_detector_config,
+)
 
 log = logging.getLogger(__name__)
 
@@ -50,17 +56,19 @@ async def lifespan(app: FastAPI):
     gen_thread = threading.Thread(
         target=run_generator,
         kwargs={"stop_event": _stop_event},
-        daemon=True, name="generator",
+        daemon=True,
+        name="generator",
     )
     worker_thread = threading.Thread(
         target=run_worker,
         kwargs={"stop_event": _stop_event},
-        daemon=True, name="worker",
+        daemon=True,
+        name="worker",
     )
     gen_thread.start()
     worker_thread.start()
 
-    yield   # app is running
+    yield  # app is running
 
     log.info("Shutting down background threads …")
     _stop_event.set()
@@ -86,6 +94,7 @@ app.add_middleware(
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
+
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "anomaly-detection-api"}
@@ -94,8 +103,8 @@ def health():
 @app.get("/api/metrics")
 def get_metrics(
     metric: str = Query("cpu"),
-    limit:  int = Query(300, ge=1, le=2000),
-    since:  str = Query(None),
+    limit: int = Query(300, ge=1, le=2000),
+    since: str = Query(None),
 ):
     """Return stored metric data points."""
     rows = fetch_metrics(metric=metric, limit=limit, since_ts=since)
@@ -120,19 +129,23 @@ def get_stats(metric: str = Query("cpu")):
 def inject_anomaly():
     """Manually inject an anomaly spike into the metric stream."""
     trigger_manual_anomaly()
-    return {"status": "queued", "message": "Anomaly will be injected on next generator tick."}
+    return {
+        "status": "queued",
+        "message": "Anomaly will be injected on next generator tick.",
+    }
 
 
 class ConfigUpdate(BaseModel):
     zscore_threshold: float = None
     iforest_contamination: float = None
 
+
 @app.post("/api/config")
 def update_config(config: ConfigUpdate):
     """Dynamically update detection thresholds."""
     update_detector_config(
         zscore_threshold=config.zscore_threshold,
-        iforest_contamination=config.iforest_contamination
+        iforest_contamination=config.iforest_contamination,
     )
     return {"status": "success", "config": config.dict(exclude_unset=True)}
 
@@ -143,6 +156,7 @@ def stream_metrics():
     Server-Sent Events endpoint.
     Clients connect here and receive a new JSON event for every data point.
     """
+
     def event_generator():
         snapshot, wake_event = subscribe_sse()
         sent_count = 0
@@ -163,6 +177,7 @@ def stream_metrics():
 
                 # Drain all new points accumulated since last wake
                 from worker import _sse_buffer, _sse_lock
+
                 with _sse_lock:
                     new_points = list(_sse_buffer)[sent_count:]
                     wake_event.clear()
@@ -180,7 +195,7 @@ def stream_metrics():
         event_generator(),
         media_type="text/event-stream",
         headers={
-            "Cache-Control":     "no-cache",
+            "Cache-Control": "no-cache",
             "X-Accel-Buffering": "no",
         },
     )

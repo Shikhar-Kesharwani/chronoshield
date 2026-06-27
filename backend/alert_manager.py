@@ -9,13 +9,15 @@ To enable Slack:
   1. Create an Incoming Webhook in your Slack App settings.
   2. Set ALERT_MODE=slack and SLACK_WEBHOOK_URL=https://hooks.slack.com/...
 """
+
 import sys, os
+
 sys.path.insert(0, os.path.dirname(__file__))
 
 import logging
 import requests
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict
 
 from config import ALERT_MODE, SLACK_WEBHOOK_URL, ALERT_SEVERITY_THRESHOLD
 
@@ -43,7 +45,7 @@ def _format_message(
     severity: float,
 ) -> str:
     sev_pct = int(severity * 100)
-    bar     = "█" * (sev_pct // 10) + "░" * (10 - sev_pct // 10)
+    bar = "█" * (sev_pct // 10) + "░" * (10 - sev_pct // 10)
     return (
         f"🚨 *Anomaly Detected* [{detector.upper()}]\n"
         f"  Metric  : `{metric}`\n"
@@ -54,7 +56,9 @@ def _format_message(
 
 
 def _send_slack(message: str):
-    if not SLACK_WEBHOOK_URL or SLACK_WEBHOOK_URL.startswith("https://hooks.slack.com/services/YOUR"):
+    if not SLACK_WEBHOOK_URL or SLACK_WEBHOOK_URL.startswith(
+        "https://hooks.slack.com/services/YOUR"
+    ):
         log.warning("Slack alert skipped — SLACK_WEBHOOK_URL not configured.")
         return
     try:
@@ -64,7 +68,9 @@ def _send_slack(message: str):
             timeout=5,
         )
         if resp.status_code != 200:
-            log.warning(f"Slack webhook returned {resp.status_code}: {resp.text}")
+            log.warning(
+                f"Slack webhook returned {resp.status_code}: {resp.text}"
+            )
         else:
             log.info("Slack alert sent.")
     except Exception as e:

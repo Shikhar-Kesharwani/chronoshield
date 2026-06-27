@@ -9,20 +9,26 @@ Flow:
   5. Push the fully-enriched data point onto a shared in-process
      deque so SSE subscribers in api.py can pick it up instantly.
 """
+
 import sys, os
+
 sys.path.insert(0, os.path.dirname(__file__))
 
 import threading
 import logging
 from collections import deque
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict, Any
 
-from config import ZSCORE_THRESHOLD, IFOREST_CONTAMINATION
 from generator import read_next
 from detectors.zscore import ZScoreDetector
 from detectors.isolation_forest import IsolationForestDetector
-from db.store import insert_metric, insert_anomaly_event, fetch_metrics, purge_old_data
+from db.store import (
+    insert_metric,
+    insert_anomaly_event,
+    fetch_metrics,
+    purge_old_data,
+)
 from alert_manager import maybe_alert
 import time
 
@@ -31,8 +37,8 @@ log = logging.getLogger(__name__)
 # ── Shared SSE broadcast buffer ───────────────────────────────────────────────
 # api.py subscribes to this deque for live streaming to clients.
 _sse_buffer: deque = deque(maxlen=500)
-_sse_lock   = threading.Lock()
-_sse_subscribers: list = []   # list of threading.Event objects
+_sse_lock = threading.Lock()
+_sse_subscribers: list = []  # list of threading.Event objects
 
 
 def _broadcast(point: Dict[str, Any]):
@@ -72,7 +78,7 @@ def _get_detectors(metric: str):
     if metric not in _zscore_detectors:
         zd = ZScoreDetector()
         ifd = IsolationForestDetector()
-        
+
         # ── WARM START: Fetch last 200 points to prime the detectors ──
         log.info(f"Warm starting detectors for metric '{metric}'...")
         historical = fetch_metrics(metric=metric, limit=200)
@@ -81,15 +87,19 @@ def _get_detectors(metric: str):
             val = float(row["value"])
             zd.update(val)
             ifd.update(val)
-            
+
         _zscore_detectors[metric] = zd
         _iforest_detectors[metric] = ifd
-        log.info(f"Detectors for '{metric}' primed with {len(historical)} historical points.")
-        
+        log.info(
+            f"Detectors for '{metric}' primed with {len(historical)} historical points."
+        )
+
     return _zscore_detectors[metric], _iforest_detectors[metric]
 
 
-def update_detector_config(zscore_threshold: float = None, iforest_contamination: float = None):
+def update_detector_config(
+    zscore_threshold: float = None, iforest_contamination: float = None
+):
     """Dynamically update thresholds for all active detectors."""
     for metric, zd in _zscore_detectors.items():
         if zscore_threshold is not None:
@@ -97,10 +107,13 @@ def update_detector_config(zscore_threshold: float = None, iforest_contamination
     for metric, ifd in _iforest_detectors.items():
         if iforest_contamination is not None:
             ifd.contamination = iforest_contamination
-    log.info(f"Updated detector configs: ZScore={zscore_threshold}, IForest={iforest_contamination}")
+    log.info(
+        f"Updated detector configs: ZScore={zscore_threshold}, IForest={iforest_contamination}"
+    )
 
 
 # ── Data Retention Daemon ─────────────────────────────────────────────────────
+
 
 def _retention_worker():
     """Runs every hour to purge data older than 7 days."""
@@ -111,10 +124,12 @@ def _retention_worker():
             log.error(f"Retention worker error: {e}")
         time.sleep(3600)  # Sleep for 1 hour
 
+
 threading.Thread(target=_retention_worker, daemon=True).start()
 
 
 # ── Main processing loop ───────────────────────────────────────────────────────
+
 
 def run_worker(stop_event: threading.Event = None):
     log.info("Detection worker started.")
@@ -130,17 +145,17 @@ def run_worker(stop_event: threading.Event = None):
             log.error(f"Stream read error: {e}")
             continue
 
-        ts_str  = msg["ts"]
-        metric  = msg["metric"]
-        value   = float(msg["value"])
+        ts_str = msg["ts"]
+        metric = msg["metric"]
+        value = float(msg["value"])
         injected = bool(msg.get("injected", False))
         ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
 
         # ── Run detectors ──────────────────────────────────────────────────────
         zd, ifd = _get_detectors(metric)
 
-        z_anomaly,  z_severity,  z_score   = zd.update(value)
-        if_anomaly, if_severity, if_score  = ifd.update(value)
+        z_anomaly, z_severity, z_score = zd.update(value)
+        if_anomaly, if_severity, if_score = ifd.update(value)
 
         # ── Persist raw metric ────────────────────────────────────────────────
         insert_metric(
@@ -156,11 +171,13 @@ def run_worker(stop_event: threading.Event = None):
 
         # ── Persist anomaly events + alert ────────────────────────────────────
         for is_anom, severity, detector_name in [
-            (z_anomaly,  z_severity,  "zscore"),
+            (z_anomaly, z_severity, "zscore"),
             (if_anomaly, if_severity, "iforest"),
         ]:
             if is_anom:
-                alerted = maybe_alert(ts_str, metric, value, detector_name, severity)
+                alerted = maybe_alert(
+                    ts_str, metric, value, detector_name, severity
+                )
                 insert_anomaly_event(
                     ts=ts,
                     metric=metric,
@@ -172,27 +189,31 @@ def run_worker(stop_event: threading.Event = None):
 
         # ── Build enriched point for SSE broadcast ────────────────────────────
         point = {
-            "ts":               ts_str,
-            "metric":           metric,
-            "value":            round(value, 4),
-            "injected":         injected,
+            "ts": ts_str,
+            "metric": metric,
+            "value": round(value, 4),
+            "injected": injected,
             # Z-Score
-            "z_score":          round(z_score, 4) if z_score is not None else None,
-            "z_anomaly":        z_anomaly,
-            "z_severity":       round(z_severity, 4),
-            "z_mean":           round(zd.current_mean, 4),
-            "z_upper":          round(zd.upper_band, 4),
-            "z_lower":          round(zd.lower_band, 4),
+            "z_score": round(z_score, 4) if z_score is not None else None,
+            "z_anomaly": z_anomaly,
+            "z_severity": round(z_severity, 4),
+            "z_mean": round(zd.current_mean, 4),
+            "z_upper": round(zd.upper_band, 4),
+            "z_lower": round(zd.lower_band, 4),
             # Isolation Forest
-            "if_score":         round(if_score, 4) if if_score is not None else None,
-            "if_anomaly":       if_anomaly,
-            "if_severity":      round(if_severity, 4),
+            "if_score": round(if_score, 4) if if_score is not None else None,
+            "if_anomaly": if_anomaly,
+            "if_severity": round(if_severity, 4),
         }
 
         _broadcast(point)
 
         if z_anomaly or if_anomaly:
             det = []
-            if z_anomaly:  det.append(f"ZScore(sev={z_severity:.2f})")
-            if if_anomaly: det.append(f"IForest(sev={if_severity:.2f})")
-            log.info(f"ANOMALY [{metric}] val={value:.2f} injected={injected} — {', '.join(det)}")
+            if z_anomaly:
+                det.append(f"ZScore(sev={z_severity:.2f})")
+            if if_anomaly:
+                det.append(f"IForest(sev={if_severity:.2f})")
+            log.info(
+                f"ANOMALY [{metric}] val={value:.2f} injected={injected} — {', '.join(det)}"
+            )

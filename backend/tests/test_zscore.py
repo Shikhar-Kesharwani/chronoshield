@@ -3,10 +3,11 @@ tests/test_zscore.py — Unit tests for the Z-Score detector
 
 Run with:  python -m pytest backend/tests/ -v
 """
+
 import sys, os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import math
 import pytest
 from detectors.zscore import ZScoreDetector
 
