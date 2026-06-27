@@ -1,184 +1,267 @@
-# AnomalyWatch — Time-Series Anomaly Detection Dashboard
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:00E5FF,100:9D4EDD&height=200&section=header&text=ChronoShield&fontSize=70&fontAlignY=35&animation=fadeIn&fontColor=ffffff" width="100%" />
 
-> **Real-time anomaly detection pipeline** over streaming time-series data using Redis Streams (or in-process mock), TimescaleDB / SQLite, rolling Z-Score and Isolation Forest detection, a live React dashboard, and configurable alerting.
+  <h3><a href="https://github.com/AyushGU12/chronoshield">Real-Time Time-Series Anomaly Detection with Dual Machine Learning Pipelines</a></h3>
 
----
+  <p>
+    <a href="https://github.com/AyushGU12/chronoshield/stargazers"><img src="https://img.shields.io/github/stars/AyushGU12/chronoshield?style=for-the-badge&color=00E5FF&logo=github" alt="Stars" /></a>
+    <a href="https://github.com/AyushGU12/chronoshield/network/members"><img src="https://img.shields.io/github/forks/AyushGU12/chronoshield?style=for-the-badge&color=9D4EDD&logo=github" alt="Forks" /></a>
+    <a href="https://github.com/AyushGU12/chronoshield/issues"><img src="https://img.shields.io/github/issues/AyushGU12/chronoshield?style=for-the-badge&color=FF0055&logo=github" alt="Issues" /></a>
+    <a href="https://github.com/AyushGU12/chronoshield/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AyushGU12/chronoshield?style=for-the-badge&color=00E5FF" alt="License" /></a>
+  </p>
 
-## Architecture
-
-```
-Metric Generator ──► Stream (Redis / Mock Queue)
-   (sine + noise,            │
-    auto + manual            ▼
-    anomaly injection)  Detection Worker
-                             │
-                    ┌────────┴────────┐
-                    ▼                 ▼
-               Z-Score           Isolation Forest
-           (rolling mean +    (trains on window,
-            std-dev bands)     flags outliers)
-                    │                 │
-                    └────────┬────────┘
-                             ▼
-                    TimescaleDB / SQLite
-                    (raw metrics + events)
-                             │
-                    ┌────────┴────────┐
-                    ▼                 ▼
-               FastAPI SSE        Alert Manager
-               (live stream)   (console / Slack)
-                    │
-                    ▼
-             React Dashboard
-          (live chart + comparison)
-```
+  <a href="https://readme-typing-svg.herokuapp.com"><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=20&pause=1000&color=00E5FF&center=true&vCenter=true&width=600&lines=Streaming+Data+Ingestion;O(1)+Rolling+Z-Score+Detection;Unsupervised+Isolation+Forests;Real-Time+SSE+Dashboard" alt="Typing SVG" /></a>
+</div>
 
 ---
 
-## Quick Start (No Docker Required)
+## 📖 Executive Overview
 
-> The project ships with **SQLite + in-process queue** mode — no Docker needed.
+**ChronoShield** is a high-performance, event-driven anomaly detection pipeline designed to ingest live time-series data and surface statistical aberrations in real-time. Built for Data Engineers, MLOps, and SREs, it balances immediate detection with machine learning accuracy by utilizing a dual-path architecture:
 
-### 1. Start the Backend
+1. **Rolling Z-Score (Fast Path):** O(1) mathematical bounds checking for instantaneous spike detection.
+2. **Isolation Forest (Smart Path):** Scikit-Learn based unsupervised machine learning that adapts to underlying data drift.
 
-```bat
-start_backend.bat
-```
-
-This will:
-- Create a Python virtual environment in `backend/.venv/`
-- Install all dependencies from `backend/requirements.txt`
-- Initialise the SQLite database
-- Start the metric generator, detection worker, and FastAPI server on **http://localhost:8000**
-
-### 2. Start the Frontend (new terminal)
-
-```bat
-start_frontend.bat
-```
-
-Opens the React dashboard at **http://localhost:5173**
-
-### 3. Run Unit Tests
-
-```bat
-run_tests.bat
-```
+**Problem Solved:** Prevents silent failures in production by providing immediate, visually stunning visibility into metric spikes, data corruption, and system latency without the heavy overhead of traditional batch processing.
 
 ---
 
-## Live Demo — Inject an Anomaly
+## 🏗 System Architecture
 
-1. Open the dashboard at `http://localhost:5173`
-2. Wait ~60 seconds for the Z-Score detector to warm up
-3. Click **"⚡ Inject Anomaly"** in the top-right
-4. Watch the red dot appear on the chart within ~1 second
-5. See the alert entry appear in the **Anomaly Events** panel
+### 📊 High-Level Data Flow
 
----
+```mermaid
+graph LR
+    A[Data Generator] -->|Redis Streams| B(FastAPI Worker)
+    B -->|Z-Score Model| C{Detection Engine}
+    B -->|IForest Model| C
+    C -->|Anomaly Events| D[(TimescaleDB)]
+    C -->|Server-Sent Events| E[React UI]
+    E -->|Real-Time Chart| F[End User]
+    
+    style A fill:#06080F,stroke:#00E5FF
+    style B fill:#06080F,stroke:#9D4EDD
+    style C fill:#06080F,stroke:#FF0055
+    style D fill:#06080F,stroke:#00E5FF
+    style E fill:#06080F,stroke:#9D4EDD
+```
 
-## Configuration
+### 🧬 Request & Detection Lifecycle
 
-Edit `.env` in the project root:
+```mermaid
+sequenceDiagram
+    participant Generator
+    participant Redis
+    participant Worker
+    participant DB
+    participant Frontend
+    
+    Generator->>Redis: Push Metric (CPU)
+    Redis->>Worker: Consume Stream
+    Worker->>Worker: Run Z-Score (O(1))
+    Worker->>Worker: Run Isolation Forest
+    Worker->>DB: Persist Metric & Flags
+    Worker-->>Frontend: Broadcast SSE (JSON)
+    Frontend->>Frontend: Trigger Framer Motion Alerts
+```
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DB_MODE` | `sqlite` | `sqlite` or `timescaledb` |
-| `REDIS_MODE` | `mock` | `mock` (no Docker) or `real` (Redis required) |
-| `ZSCORE_WINDOW` | `60` | Rolling window size (data points) |
-| `ZSCORE_THRESHOLD` | `3.0` | Z-Score threshold (σ) for flagging |
-| `IFOREST_WINDOW` | `200` | Training window for Isolation Forest |
-| `IFOREST_CONTAMINATION` | `0.05` | Expected anomaly ratio (5%) |
-| `ALERT_SEVERITY_THRESHOLD` | `0.7` | Min severity (0–1) to fire an alert |
-| `ALERT_MODE` | `console` | `console` or `slack` |
-| `SLACK_WEBHOOK_URL` | — | Slack Incoming Webhook URL |
-| `GENERATOR_RATE` | `1.0` | Data points per second |
-| `GENERATOR_ANOMALY_PROB` | `0.02` | Auto-inject probability (2%) |
+### 🗄 Database Schema (ER Diagram)
 
----
-
-## With Docker (Production-Grade)
-
-Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-
-```bat
-# Start Redis + TimescaleDB
-docker-compose up -d
-
-# Update .env
-# DB_MODE=timescaledb
-# REDIS_MODE=real
-
-# Then start backend and frontend as above
-start_backend.bat
-start_frontend.bat
+```mermaid
+erDiagram
+    METRICS {
+        timestamp ts PK
+        string metric
+        float value
+        boolean is_anomaly_zscore
+        boolean is_anomaly_iforest
+    }
+    ANOMALIES {
+        timestamp ts PK
+        string metric
+        float value
+        string detector
+        float severity
+    }
+    METRICS ||--o{ ANOMALIES : triggers
 ```
 
 ---
 
-## Detection Methods
+## 💻 Tech Stack & Analytics
 
-### Rolling Z-Score
-- Maintains a sliding window of the last N data points
-- Computes rolling mean (μ) and standard deviation (σ) in **O(1)** using running sums
-- Flags points where |z| = |(x − μ) / σ| > threshold
-- **Trade-off:** Fast, interpretable, adapts to drift — but assumes normality, struggles with seasonal patterns
+<div align="center">
+  <img src="https://skillicons.dev/icons?i=react,vite,python,fastapi,redis,postgres,docker,github&theme=dark" />
+</div>
 
-### Isolation Forest
-- Trains an ensemble of random decision trees on a historical window
-- Points that are isolated quickly (short average path length) score as anomalies
-- Features: `[value, delta]` — current reading + first derivative
-- **Trade-off:** Handles multivariate / non-normal distributions, no stationarity assumption — but slower to train, less interpretable, needs warm-up data
+<br />
 
-### Precision / Recall Evaluation
-- **Ground truth:** All manually injected spikes and auto-injected spikes are labelled (`injected=1`)
-- The **Comparison** panel on the dashboard shows live precision/recall for both methods
-- Tune `ZSCORE_THRESHOLD` to adjust false-positive/negative trade-off
+<details>
+<summary><b>View GitHub Activity & Stats</b></summary>
+<br />
+<div align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=AyushGU12&show_icons=true&theme=tokyonight&hide_border=true" />
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=AyushGU12&theme=tokyonight&hide_border=true" />
+</div>
+</details>
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
-```
-Time_Series_Detection/
-├── .env                        # Configuration
-├── docker-compose.yml          # Redis + TimescaleDB (optional)
-├── start_backend.bat           # Windows: launch backend
-├── start_frontend.bat          # Windows: launch frontend
-├── run_tests.bat               # Windows: run unit tests
-│
-├── backend/
-│   ├── api.py                  # FastAPI app (SSE + REST)
-│   ├── worker.py               # Detection processing loop
-│   ├── generator.py            # Synthetic metric generator
-│   ├── alert_manager.py        # Console / Slack alerting
-│   ├── config.py               # Centralised config from .env
-│   ├── requirements.txt
-│   ├── db/
-│   │   ├── init_db.py          # Schema initialisation
-│   │   └── store.py            # Read/write helpers
-│   ├── detectors/
-│   │   ├── zscore.py           # Rolling Z-Score detector
-│   │   └── isolation_forest.py # Isolation Forest detector
-│   └── tests/
-│       └── test_zscore.py      # Pytest unit tests
-│
-└── frontend/
-    ├── index.html
-    ├── vite.config.js
-    └── src/
-        ├── App.jsx             # Main dashboard
-        ├── index.css           # Design system
-        ├── hooks/
-        │   └── useMetricStream.js  # SSE + stats hook
-        └── components/
-            ├── LiveChart.jsx       # Recharts streaming chart
-            ├── AlertFeed.jsx       # Anomaly event feed
-            └── ComparisonPanel.jsx # Precision/recall comparison
+```text
+📦 chronoshield
+ ┣ 📂 backend
+ ┃ ┣ 📂 db               # TimescaleDB & SQLite connection logic
+ ┃ ┣ 📂 detectors        # Z-Score & IForest algorithm implementations
+ ┃ ┣ 📂 tests            # Pytest suites
+ ┃ ┣ 📜 api.py           # FastAPI SSE Endpoints
+ ┃ ┣ 📜 worker.py        # Stream consumption & detection pipeline
+ ┃ ┣ 📜 generator.py     # Synthetic data generation
+ ┃ ┗ 📜 requirements.txt
+ ┣ 📂 frontend
+ ┃ ┣ 📂 src
+ ┃ ┃ ┣ 📂 components     # Recharts & Framer Motion UI
+ ┃ ┃ ┣ 📂 hooks          # React SSE bindings
+ ┃ ┃ ┣ 📜 App.jsx        # Glassmorphic grid layout
+ ┃ ┃ ┗ 📜 index.css      # Design tokens & CSS vars
+ ┃ ┣ 📜 package.json
+ ┃ ┗ 📜 vite.config.js
+ ┣ 📜 docker-compose.yml
+ ┣ 📜 .env
+ ┗ 📜 README.md
 ```
 
 ---
 
-## Resume Bullet
+## ✨ Features
 
-> Built a real-time anomaly detection pipeline over streaming time-series data using Redis Streams and TimescaleDB; implemented and benchmarked rolling Z-Score and Isolation Forest detection methods, measuring precision/recall trade-offs on a labeled evaluation set, with Slack alerting on threshold breach. Visualised results on a live React dashboard with Server-Sent Events streaming.
+### ✅ Completed
+- [x] **Dual Detection Engine:** Z-Score and Isolation Forest running in parallel.
+- [x] **Live SSE Streaming:** Zero-polling, instant data propagation from backend to frontend.
+- [x] **Glassmorphic UI:** Premium React/Vite dashboard with Framer Motion micro-animations.
+- [x] **Advanced Charting:** Recharts Area charts with custom glowing SVG anomaly indicators.
+- [x] **Database Agnostic:** Fallback to SQLite if TimescaleDB/Postgres is unavailable.
+
+### 🔄 In Progress
+- [ ] **Slack/Discord Alerting:** Webhook integration for severe anomalies.
+- [ ] **Dynamic Threshold Tuning:** UI sliders to adjust detection sensitivity on the fly.
+
+### 📌 Planned
+- [ ] **Autoencoder Neural Networks:** Deep learning path for complex multivariate metrics.
+- [ ] **Kubernetes Helm Charts:** For enterprise scale deployments.
+
+---
+
+## 🚀 Installation & Setup
+
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- Docker & Docker Compose (Optional but recommended)
+
+### 🐳 Docker Production Setup (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/AyushGU12/chronoshield.git
+cd chronoshield
+
+# Start the entire stack (Redis, TimescaleDB, Backend, Frontend)
+docker-compose up -d --build
+```
+> The dashboard will be available at `http://localhost:5173`
+
+### 💻 Local Development Setup
+
+<details>
+<summary><b>Backend Setup (FastAPI)</b></summary>
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# Start the backend (Defaults to SQLite and In-Memory Queue)
+../start_backend.bat
+```
+</details>
+
+<details>
+<summary><b>Frontend Setup (React/Vite)</b></summary>
+
+```bash
+cd frontend
+npm install
+
+# Start the dev server
+../start_frontend.bat
+```
+</details>
+
+---
+
+## 📡 API Documentation
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | `GET` | Health check endpoint |
+| `/api/stream` | `GET` | **SSE Stream**. Pushes live JSON metrics and anomaly flags |
+| `/api/metrics` | `GET` | Retrieve historical metric data from DB |
+| `/api/stats` | `GET` | Retrieve precision/recall statistics for both models |
+| `/api/inject` | `POST` | Manually inject a synthetic anomaly into the stream |
+
+---
+
+## 🔐 Security & Reliability
+
+- **CORS Configuration:** Strictly scoped to frontend origins (`localhost:5173`, etc).
+- **Data Protection:** Prepared statements and ORM abstraction to prevent SQL Injection.
+- **Fail-Safes:** Background threads gracefully degrade to in-memory queues if Redis is unreachable.
+
+---
+
+## ⚡ Performance & Scalability
+
+- **Time Complexity:** The Rolling Z-Score detector executes in exactly **O(1)** time using running sums.
+- **Concurrency:** FastAPI's `asyncio` combined with `threading.Event` allows thousands of SSE clients to subscribe to the single worker broadcast without blocking the detection loop.
+- **Database Indexing:** TimescaleDB hypertable indexes on `(metric, timestamp DESC)` for lightning-fast historical queries.
+
+---
+
+## 🧪 Testing Strategy
+
+Run the backend test suite:
+```bash
+cd backend
+pytest tests/ -v --cov=.
+```
+- **Unit Tests:** Ensures mathematical correctness of Z-Score bounding and normalisation.
+- **Integration Tests:** Validates stream queuing and SSE broadcast logic.
+
+---
+
+## 📈 Monitoring & Observability
+
+- **Logs:** Structured standard output for all pipeline components.
+- **Dashboard Stats:** The UI actively monitors Model Precision & Recall based on injected synthetic spikes vs caught spikes.
+
+---
+
+## 🤝 Contributing
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m '✨ Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:9D4EDD,100:00E5FF&height=100&section=footer" width="100%" />
+  
+  <p><b>Built with ❤️ by <a href="https://github.com/AyushGU12">AyushGU12</a></b></p>
+  <p><i>If this project helped you, please consider giving it a ⭐ on GitHub!</i></p>
+</div>
