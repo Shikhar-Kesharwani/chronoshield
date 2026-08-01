@@ -70,7 +70,11 @@ def insert_metric(
     )
     try:
         with conn:
-            conn.execute(sql, params)
+            if IS_POSTGRES:
+                with conn.cursor() as cur:
+                    cur.execute(sql, params)
+            else:
+                conn.execute(sql, params)
     except Exception as e:
         log.error(f"insert_metric error: {e}")
     finally:
@@ -93,17 +97,31 @@ def insert_anomaly_event(
     """
     try:
         with conn:
-            conn.execute(
-                sql,
-                (
-                    ts.isoformat(),
-                    metric,
-                    value,
-                    detector,
-                    severity,
-                    int(alerted),
-                ),
-            )
+            if IS_POSTGRES:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        sql,
+                        (
+                            ts.isoformat(),
+                            metric,
+                            value,
+                            detector,
+                            severity,
+                            int(alerted),
+                        ),
+                    )
+            else:
+                conn.execute(
+                    sql,
+                    (
+                        ts.isoformat(),
+                        metric,
+                        value,
+                        detector,
+                        severity,
+                        int(alerted),
+                    ),
+                )
     except Exception as e:
         log.error(f"insert_anomaly_event error: {e}")
     finally:
@@ -122,7 +140,11 @@ def purge_old_data(days: int = 7) -> None:
 
     try:
         with conn:
-            conn.execute(sql, params)
+            if IS_POSTGRES:
+                with conn.cursor() as cur:
+                    cur.execute(sql, params)
+            else:
+                conn.execute(sql, params)
         log.info(f"Purged metrics data older than {days} days.")
     except Exception as e:
         log.error(f"purge_old_data error: {e}")
@@ -166,12 +188,16 @@ def fetch_metrics(
         """
         params = (metric, limit)
     try:
-        cur = conn.execute(sql, params)
-        rows = cur.fetchall()
         if IS_POSTGRES:
+            cur = conn.cursor()
+            cur.execute(sql, params)
+            rows = cur.fetchall()
             cols = [d[0] for d in cur.description]
             result = [dict(zip(cols, r)) for r in rows]
+            cur.close()
         else:
+            cur = conn.execute(sql, params)
+            rows = cur.fetchall()
             result = [dict(r) for r in rows]
         return result if since_ts else list(reversed(result))
     except Exception as e:
@@ -190,12 +216,18 @@ def fetch_anomaly_events(limit: int = 50) -> List[Dict[str, Any]]:
         ORDER BY ts DESC LIMIT {ph}
     """
     try:
-        cur = conn.execute(sql, (limit,))
-        rows = cur.fetchall()
         if IS_POSTGRES:
+            cur = conn.cursor()
+            cur.execute(sql, (limit,))
+            rows = cur.fetchall()
             cols = [d[0] for d in cur.description]
-            return [dict(zip(cols, r)) for r in rows]
-        return [dict(r) for r in rows]
+            res = [dict(zip(cols, r)) for r in rows]
+            cur.close()
+            return res
+        else:
+            cur = conn.execute(sql, (limit,))
+            rows = cur.fetchall()
+            return [dict(r) for r in rows]
     except Exception as e:
         log.error(f"fetch_anomaly_events error: {e}")
         return []
@@ -220,14 +252,21 @@ def fetch_detector_stats(metric: str = "cpu") -> Dict[str, Any]:
         FROM metrics WHERE metric={ph}
     """
     try:
-        cur = conn.execute(sql, (metric,))
-        row = cur.fetchone()
-        if row is None:
-            return {}
         if IS_POSTGRES:
+            cur = conn.cursor()
+            cur.execute(sql, (metric,))
+            row = cur.fetchone()
+            if row is None:
+                cur.close()
+                return {}
             cols = [d[0] for d in cur.description]
             d = dict(zip(cols, row))
+            cur.close()
         else:
+            cur = conn.execute(sql, (metric,))
+            row = cur.fetchone()
+            if row is None:
+                return {}
             d = dict(row)
 
         def _safe(num, den):
