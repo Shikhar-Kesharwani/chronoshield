@@ -13,7 +13,7 @@ import threading
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from config import DB_MODE
+from config import DB_MODE, DATABASE_URL
 from db.init_db import get_connection
 
 log = logging.getLogger(__name__)
@@ -21,9 +21,11 @@ log = logging.getLogger(__name__)
 # Thread-local SQLite connection pool (SQLite is not safe across threads)
 _local = threading.local()
 
+IS_POSTGRES = bool(DATABASE_URL or DB_MODE in ("timescaledb", "postgres"))
+
 
 def _get_conn():
-    if DB_MODE != "timescaledb":
+    if not IS_POSTGRES:
         if not hasattr(_local, "conn") or _local.conn is None:
             _local.conn = get_connection()
         return _local.conn
@@ -31,7 +33,7 @@ def _get_conn():
 
 
 def _close_pg(conn):
-    if DB_MODE == "timescaledb":
+    if IS_POSTGRES:
         conn.close()
 
 
@@ -49,7 +51,7 @@ def insert_metric(
     injected: bool = False,
 ) -> None:
     conn = _get_conn()
-    ph = "%s" if DB_MODE == "timescaledb" else "?"
+    ph = "%s" if IS_POSTGRES else "?"
     sql = f"""
         INSERT INTO metrics
             (ts, metric, value, is_anomaly_zscore, is_anomaly_iforest,
@@ -84,7 +86,7 @@ def insert_anomaly_event(
     alerted: bool = False,
 ) -> None:
     conn = _get_conn()
-    ph = "%s" if DB_MODE == "timescaledb" else "?"
+    ph = "%s" if IS_POSTGRES else "?"
     sql = f"""
         INSERT INTO anomaly_events (ts, metric, value, detector, severity, alerted)
         VALUES ({ph},{ph},{ph},{ph},{ph},{ph})
@@ -111,7 +113,7 @@ def insert_anomaly_event(
 def purge_old_data(days: int = 7) -> None:
     """Delete metrics older than X days to prevent DB bloat."""
     conn = _get_conn()
-    if DB_MODE == "timescaledb":
+    if IS_POSTGRES:
         sql = f"DELETE FROM metrics WHERE ts < NOW() - INTERVAL '{days} days'"
         params = ()
     else:
@@ -144,7 +146,7 @@ def fetch_metrics(
     since_ts: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     conn = _get_conn()
-    ph = "%s" if DB_MODE == "timescaledb" else "?"
+    ph = "%s" if IS_POSTGRES else "?"
     if since_ts:
         sql = f"""
             SELECT ts, metric, value, is_anomaly_zscore, is_anomaly_iforest,
@@ -166,7 +168,7 @@ def fetch_metrics(
     try:
         cur = conn.execute(sql, params)
         rows = cur.fetchall()
-        if DB_MODE == "timescaledb":
+        if IS_POSTGRES:
             cols = [d[0] for d in cur.description]
             result = [dict(zip(cols, r)) for r in rows]
         else:
@@ -181,7 +183,7 @@ def fetch_metrics(
 
 def fetch_anomaly_events(limit: int = 50) -> List[Dict[str, Any]]:
     conn = _get_conn()
-    ph = "%s" if DB_MODE == "timescaledb" else "?"
+    ph = "%s" if IS_POSTGRES else "?"
     sql = f"""
         SELECT ts, metric, value, detector, severity, alerted
         FROM anomaly_events
@@ -190,7 +192,7 @@ def fetch_anomaly_events(limit: int = 50) -> List[Dict[str, Any]]:
     try:
         cur = conn.execute(sql, (limit,))
         rows = cur.fetchall()
-        if DB_MODE == "timescaledb":
+        if IS_POSTGRES:
             cols = [d[0] for d in cur.description]
             return [dict(zip(cols, r)) for r in rows]
         return [dict(r) for r in rows]
@@ -204,7 +206,7 @@ def fetch_anomaly_events(limit: int = 50) -> List[Dict[str, Any]]:
 def fetch_detector_stats(metric: str = "cpu") -> Dict[str, Any]:
     """Return precision/recall-like stats for the labeled evaluation window."""
     conn = _get_conn()
-    ph = "%s" if DB_MODE == "timescaledb" else "?"
+    ph = "%s" if IS_POSTGRES else "?"
     sql = f"""
         SELECT
             SUM(injected)                                        AS total_injected,
@@ -222,7 +224,7 @@ def fetch_detector_stats(metric: str = "cpu") -> Dict[str, Any]:
         row = cur.fetchone()
         if row is None:
             return {}
-        if DB_MODE == "timescaledb":
+        if IS_POSTGRES:
             cols = [d[0] for d in cur.description]
             d = dict(zip(cols, row))
         else:

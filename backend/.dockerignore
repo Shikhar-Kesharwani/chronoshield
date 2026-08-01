@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.env
+anomaly_detection.db
+anomaly_detection.db-journal
+.pytest_cache/

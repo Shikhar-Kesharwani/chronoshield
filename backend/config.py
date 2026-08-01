@@ -12,7 +12,10 @@ _env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(_env_path)
 
 # ── Database ──────────────────────────────────────────────────────────────────
-DB_MODE = os.getenv("DB_MODE", "sqlite")  # "sqlite" | "timescaledb"
+# Dynamic Database URL for Managed Cloud Environments (Render, Heroku, etc.)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+DB_MODE = os.getenv("DB_MODE", "sqlite")  # "sqlite" | "timescaledb" | "postgres"
 
 TIMESCALE_HOST = os.getenv("TIMESCALE_HOST", "localhost")
 TIMESCALE_PORT = int(os.getenv("TIMESCALE_PORT", "5432"))

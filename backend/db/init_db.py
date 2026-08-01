@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import logging
 import sqlite3
 
-from config import (DB_MODE, SQLITE_PATH, TIMESCALE_DB, TIMESCALE_HOST,
+from config import (DATABASE_URL, DB_MODE, SQLITE_PATH, TIMESCALE_DB, TIMESCALE_HOST,
                     TIMESCALE_PASS, TIMESCALE_PORT, TIMESCALE_USER)
 
 log = logging.getLogger(__name__)
@@ -45,8 +45,17 @@ CREATE TABLE IF NOT EXISTS anomaly_events (
 
 
 def get_connection():
-    """Return a DB connection based on DB_MODE."""
-    if DB_MODE == "timescaledb":
+    """Return a DB connection based on DB_MODE or DATABASE_URL."""
+    if DATABASE_URL:
+        try:
+            import psycopg2
+            # Connect using the dynamic connection string
+            conn = psycopg2.connect(DATABASE_URL, connect_timeout=5)
+            return conn
+        except Exception as e:
+            log.warning(f"Failed to connect to DATABASE_URL ({e}). Falling back to SQLite.")
+            
+    elif DB_MODE in ("timescaledb", "postgres"):
         try:
             import psycopg2
 
@@ -61,7 +70,7 @@ def get_connection():
             return conn
         except Exception as e:
             log.warning(
-                f"TimescaleDB unavailable ({e}). Falling back to SQLite."
+                f"TimescaleDB/Postgres unavailable ({e}). Falling back to SQLite."
             )
 
     # SQLite fallback
@@ -74,7 +83,7 @@ def init_db():
     """Create tables (and hypertable for TimescaleDB) if they don't exist."""
     conn = get_connection()
 
-    if DB_MODE == "timescaledb":
+    if DATABASE_URL or DB_MODE in ("timescaledb", "postgres"):
         # Use psycopg2-compatible schema
         pg_metrics = (
             _CREATE_METRICS.replace(
@@ -96,14 +105,18 @@ def init_db():
             cur = conn.cursor()
             cur.execute(pg_metrics)
             cur.execute(pg_anomalies)
-            # Create TimescaleDB hypertables (idempotent)
-            for tbl in ("metrics", "anomaly_events"):
-                cur.execute(f"""
-                    SELECT create_hypertable('{tbl}', 'ts',
-                        if_not_exists => TRUE,
-                        migrate_data  => TRUE);
-                """)
-        log.info("TimescaleDB tables + hypertables ready.")
+            # Create TimescaleDB hypertables (idempotent, fails safely if not Timescale extension)
+            if DB_MODE == "timescaledb":
+                for tbl in ("metrics", "anomaly_events"):
+                    try:
+                        cur.execute(f"""
+                            SELECT create_hypertable('{tbl}', 'ts',
+                                if_not_exists => TRUE,
+                                migrate_data  => TRUE);
+                        """)
+                    except Exception as e:
+                        log.warning(f"Hypertable creation failed, continuing as standard Postgres: {e}")
+        log.info("Postgres/TimescaleDB tables ready.")
     else:
         with conn:
             conn.execute(_CREATE_METRICS)
