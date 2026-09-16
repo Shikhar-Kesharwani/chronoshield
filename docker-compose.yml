@@ -1,59 +1,16 @@
-version: '3.9'
-
+version: '3.8'
 services:
-  backend:
-    build: 
-      context: ./backend
-    container_name: chronoshield_backend
-    ports:
-      - "8000:8000"
-    environment:
-      - PORT=8000
-      - DB_MODE=sqlite
-      - REDIS_MODE=mock
-      - GENERATOR_RATE=1.0
-      - CORS_ORIGINS=http://localhost:80,http://localhost:5173
-    volumes:
-      - backend_data:/app/db_data
-    # In SQLite mode, we want to store the DB on the volume. 
-    # But for Model 1, the app naturally creates anomaly_detection.db. 
-    # By default, we let it use the volume directory if we override the path, but let's just let it be built-in for now.
-    
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_API_URL: http://localhost:8000
-    container_name: chronoshield_frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-
-  # ── Optional Enterprise Services ────────────────────────────────────────────
-  # (These are kept from your original setup for heavy local testing)
-  redis:
-    image: redis:7-alpine
-    container_name: ts_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --save 60 1 --loglevel warning
-
-  timescaledb:
-    image: timescale/timescaledb:latest-pg15
-    container_name: ts_timescaledb
-    environment:
-      POSTGRES_DB: anomaly_detection
-      POSTGRES_USER: tsuser
-      POSTGRES_PASSWORD: tspassword
-    ports:
-      - "5432:5432"
-    volumes:
-      - timescale_data:/var/lib/postgresql/data
-
-volumes:
-  backend_data:
-  redis_data:
-  timescale_data:
+  api:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - app-network
+    healthcheck:
+      test: ['CMD','curl','-f','http://localhost:8000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+networks:
+  app-network:
+    driver: bridge

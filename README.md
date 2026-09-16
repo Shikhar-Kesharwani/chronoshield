@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <!-- Waving animated gradient banner -->
 ![Banner](https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=220&section=header&text=ChronoShield&fontSize=60&fontColor=fff&animation=twinkling&fontAlignY=38&desc=Enterprise-Grade%20Time-Series%20Anomaly%20Detection&descAlignY=58&descSize=20)
@@ -8,17 +8,17 @@
 
 <div align="center">
 
-![Stars](https://img.shields.io/github/stars/AyushGU12/chronoshield?style=for-the-badge&logo=github&color=6366f1)
-![Forks](https://img.shields.io/github/forks/AyushGU12/chronoshield?style=for-the-badge&logo=github&color=8b5cf6)
-![Issues](https://img.shields.io/github/issues/AyushGU12/chronoshield?style=for-the-badge&logo=github&color=ec4899)
-![License](https://img.shields.io/github/license/AyushGU12/chronoshield?style=for-the-badge&color=f97316)
-![Last Commit](https://img.shields.io/github/last-commit/AyushGU12/chronoshield?style=for-the-badge&color=14b8a6)
+![Stars](https://img.shields.io/github/stars/Shikhar-Kesharwani/Time_Series_Detection?style=for-the-badge&logo=github&color=6366f1)
+![Forks](https://img.shields.io/github/forks/Shikhar-Kesharwani/Time_Series_Detection?style=for-the-badge&logo=github&color=8b5cf6)
+![Issues](https://img.shields.io/github/issues/Shikhar-Kesharwani/Time_Series_Detection?style=for-the-badge&logo=github&color=ec4899)
+![License](https://img.shields.io/github/license/Shikhar-Kesharwani/Time_Series_Detection?style=for-the-badge&color=f97316)
+![Last Commit](https://img.shields.io/github/last-commit/Shikhar-Kesharwani/Time_Series_Detection?style=for-the-badge&color=14b8a6)
 
 </div>
 
 <br />
 
-[🌐 Live Demo](#) &nbsp;&nbsp; [📖 Documentation](#) &nbsp;&nbsp; [🐛 Report Bug](https://github.com/AyushGU12/chronoshield/issues) &nbsp;&nbsp; [✨ Request Feature](https://github.com/AyushGU12/chronoshield/issues) &nbsp;&nbsp; [💬 Discussions](https://github.com/AyushGU12/chronoshield/discussions)
+[🌐 Live Demo](#) &nbsp;&nbsp; [📖 Documentation](#) &nbsp;&nbsp; [🐛 Report Bug](https://github.com/Shikhar-Kesharwani/Time_Series_Detection/issues) &nbsp;&nbsp; [✨ Request Feature](https://github.com/Shikhar-Kesharwani/Time_Series_Detection/issues) &nbsp;&nbsp; [💬 Discussions](https://github.com/Shikhar-Kesharwani/Time_Series_Detection/discussions)
 
 <svg width="700" height="120" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -256,7 +256,7 @@ pie title Technology Distribution
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🔥 Step 1 — Clone repository
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-git clone https://github.com/AyushGU12/chronoshield.git
+git clone https://github.com/Shikhar-Kesharwani/Time_Series_Detection.git
 cd chronoshield
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -327,7 +327,7 @@ npm install
 <div align="center">
 
 ⭐ **Star this repo** if you found it useful! <br>
-Made with ❤️ by [AyushGU12](https://github.com/AyushGU12)
+Made with ❤️ by [Shikhar-Kesharwani](https://github.com/Shikhar-Kesharwani)
 
 </div>
 ## Deployment
